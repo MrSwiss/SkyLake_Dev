@@ -215,6 +215,7 @@ bool WINAPI chat_process_gm_commands(chat_message * msg)
 			else if (stringStartsWith(cmd, "itemc"))
 			{
 				uint64 item_count = entity_manager::item_count();
+				chat_send_simple_system_message("ITEM_COUNT:" + std::to_string(item_count), msg->p_);
 			}
 			else if (stringStartsWith(cmd, "gold"))
 			{

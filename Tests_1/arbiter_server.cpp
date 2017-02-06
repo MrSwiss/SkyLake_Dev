@@ -377,7 +377,7 @@ void WINAPI arbiter_server_process_job(void* j, e_job_type type, sql::Connection
 		data.WriteFloat(j_->p_->position.y.load());
 		data.WriteFloat(j_->p_->position.z.load());
 		data.WriteInt32(j_->p_->position.heading.load());
-		data.WriteInt16(j_->p_->status > 0 ? j_->p_->stats.base_movement_speed : j_->p_->stats.base_run_speed); //todo
+		data.WriteInt16(j_->p_->stats.get_movement_speed(j_->p_->status)); //todo
 		data.WriteFloat(j_->p_->position.t_x.load());
 		data.WriteFloat(j_->p_->position.t_y.load());
 		data.WriteFloat(j_->p_->position.t_z.load());
