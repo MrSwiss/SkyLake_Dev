@@ -191,6 +191,7 @@
     <ClInclude Include="entity_manager.h" />
     <ClInclude Include="active_server.h" />
     <ClInclude Include="passivityEnums.h" />
+    <ClInclude Include="p_processor.h" />
     <ClInclude Include="skylake_stats.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="zone.h" />
