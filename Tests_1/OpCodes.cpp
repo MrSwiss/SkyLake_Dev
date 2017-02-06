@@ -54,6 +54,8 @@ bool opcode_init()
 	opcode_add(C_SELECT_USER, op_select_player);
 	opcode_add(C_DELETE_USER, op_delete_player);
 	opcode_add(C_CANCEL_DELETE_USER, op_cancel_delete_player);
+	opcode_add(C_RETURN_TO_LOBBY, op_return_to_lobby);
+	opcode_add(C_EXIT, op_exit);
 
 	//--------------------------------------------------------------WORLD
 	opcode_add(C_LOAD_TOPO_FIN, op_load_topo_fin);
@@ -1626,15 +1628,39 @@ bool WINAPI op_load_topo_fin(std::shared_ptr<connection>c, void* argv[])
 	return world_server_process_job_async(new j_enter_world(c->_players[c->_selected_player], data), J_W_PLAYER_ENTER_WORLD);
 }
 
-bool WINAPI op_return_to_lobby(std::shared_ptr<connection>, void* argv[])
+bool WINAPI op_return_to_lobby(std::shared_ptr<connection> c, void* argv[])
 {
-	//todo timed events
-	return false;
+	//todo timed
+	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
+	active_remove_player(c->_players[c->_selected_player]);
+
+	Sleep(500);
+	Stream data = Stream();
+	data.Resize(4);
+	data.WriteInt16(4);
+	data.WriteInt16(S_RETURN_TO_LOBBY);
+	c->_players[c->_selected_player]->con->_inLobby = true;
+	return connection_send(c, &data);
+
 }
 
 bool WINAPI op_cancel_return_to_lobby(std::shared_ptr<connection>, void* argv[])
 {
 	return false;
+}
+
+bool WINAPI op_exit(std::shared_ptr<connection> c, void* argv[])
+{
+	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
+	active_remove_player(c->_players[c->_selected_player]);
+
+	Stream data = Stream();
+	data.Resize(12);
+	data.WriteInt16(12);
+	data.WriteInt16(S_EXIT);
+	data.WriteInt16(0);
+	data.WriteInt32(1);
+	return connection_send(c, &data);
 }
 
 bool WINAPI op_guard_pk_policy(std::shared_ptr<connection>c, void* argv[])

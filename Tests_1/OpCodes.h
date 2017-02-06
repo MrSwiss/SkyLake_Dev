@@ -44,6 +44,7 @@ bool WINAPI op_delete_player(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_cancel_delete_player(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_save_client_account_settings(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_save_client_user_settings(std::shared_ptr<connection>, void* argv[]);
+bool WINAPI op_exit(std::shared_ptr<connection> c, void* argv[]);
 
 //world
 bool WINAPI op_load_topo_fin(std::shared_ptr<connection>, void* argv[]);
