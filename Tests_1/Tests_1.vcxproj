@@ -140,6 +140,7 @@
     <ClCompile Include="contract_manager.cpp" />
     <ClCompile Include="entity.cpp" />
     <ClCompile Include="entity_manager.cpp" />
+    <ClCompile Include="p_processor.cpp" />
     <ClCompile Include="skylake_stats.cpp" />
     <ClCompile Include="zone.cpp" />
     <ClCompile Include="Bounds.cpp" />

@@ -3,6 +3,7 @@
 #include "passivitytemplate.h"
 #include "dataservice.h"
 #include "equipmentdatatemplate.h"
+#include "enchantdatatemplate.h"
 #include "player.h"
 #include "Stream.h"
 #include "connexion.h"
@@ -11,9 +12,9 @@
 #include "chat.h"
 #include "config.h"
 #include "entity_manager.h"
+#include "p_processor.h"
 
 #include <fstream>
-#include "enchantdatatemplate.h"
 
 inventory::inventory() : parent(nullptr)
 {
@@ -242,25 +243,11 @@ bool inventory::equipe_item(slot_id s_id)
 			break;
 		}
 
-
-		player_send_external_change(parent, 1);
-
-		parent->stats.clear_bonus();
-		std::vector<const passivity_template*> passivities;
-		get_profile_passivities(passivities);
-		parent->lock_stats();
-		for (size_t i = 0; i < passivities.size(); i++) {
-			player_process_passivitie(parent, passivities[i]);
-		}
-		parent->unlock_stats();
-
 		LeaveCriticalSection(&inv_lock);
 
-		refresh_enchat_effect();
-		refresh_items_modifiers();
-
+		player_send_external_change(parent, 1);
+		player_recalculate_inventory_stats(parent);
 		player_send_stats(parent);
-
 		send();
 		return true;
 	}
@@ -282,26 +269,11 @@ bool inventory::unequipe_item(slot_id s_id)
 	profile_slots[s_id - 1]._item->binderDBId = 0;
 
 	inventory_interchange_items(profile_slots[s_id - 1], inventory_slots[i]);
-
-	player_send_external_change(parent, 1);
-
-
-	std::vector<const passivity_template*> passivities;
-	get_profile_passivities(passivities);
-	parent->lock_stats();
-	parent->stats.clear_bonus();
-	for (size_t i = 0; i < passivities.size(); i++) {
-		player_process_passivitie(parent, passivities[i]);
-	}
-	parent->unlock_stats();
-
 	LeaveCriticalSection(&inv_lock);
 
-	refresh_enchat_effect();
-	refresh_items_modifiers();
-
+	player_send_external_change(parent, 1);
+	player_recalculate_inventory_stats(parent);
 	player_send_stats(parent);
-
 	send();
 	return true;
 }
@@ -929,8 +901,7 @@ uint32 WINAPI item_stack(std::shared_ptr<item> i, uint32 stack_count, byte mode)
 	return out;
 }
 
-bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count)
-{
+bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count){
 	if (!j.isEmpty)
 		return false;
 
@@ -944,8 +915,7 @@ bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count)
 	return false;
 }
 
-void WINAPI slot_wipe(inventory_slot &s)
-{
+void WINAPI slot_wipe(inventory_slot &s){
 	if (!s.isEmpty) {
 		entity_manager::destroy_item(s._item->eid);
 		s._item = nullptr;

@@ -68,6 +68,7 @@ void WINAPI					player_load_user_settings(std::shared_ptr<player>, sql::Connecti
 bool WINAPI					player_send_external_change(std::shared_ptr<player>, byte broadcast = 0x00);
 void WINAPI					player_write_spawn_packet(std::shared_ptr<player>, Stream&);
 void WINAPI					player_send_stats(p_ptr);
+void WINAPI					player_recalculate_inventory_stats(p_ptr);
 void WINAPI					player_recalculate_stats(p_ptr);
 
 void WINAPI					player_process_passivitie(p_ptr, const passivity_template*);
