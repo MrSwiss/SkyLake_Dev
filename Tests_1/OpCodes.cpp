@@ -2025,9 +2025,14 @@ bool WINAPI op_chat(std::shared_ptr<connection> c, void * argv[])
 bool WINAPI op_del_item(std::shared_ptr<connection> c, void * argv[])
 {
 	c->_recvBuffer.data._pos = 8;
-	uint32 slot = c->_recvBuffer.data.ReadInt32();
-
-	slot_wipe(c->_players[c->_selected_player]->i_.inventory_slots[slot]);
+	uint32 slot = c->_recvBuffer.data.ReadUInt32();
+	uint32 stack = c->_recvBuffer.data.ReadUInt32();
+	c->_players[c->_selected_player]->i_.lock();
+	c->_players[c->_selected_player]->i_.inventory_slots[slot]._item->stackCount -= stack;
+	if (c->_players[c->_selected_player]->i_.inventory_slots[slot]._item->stackCount <= 0) {
+		slot_wipe(c->_players[c->_selected_player]->i_.inventory_slots[slot]);
+	}
+	c->_players[c->_selected_player]->i_.unlock();
 	c->_players[c->_selected_player]->i_.send();
 	return true;
 }

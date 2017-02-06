@@ -28,7 +28,7 @@ inventory::~inventory()
 {
 	DeleteCriticalSection(&inv_lock);
 
-	for (uint16 i = 0; i < 20; i++)
+	for (uint16 i = 0; i < PROFILE_MAX; i++)
 	{
 		slot_wipe(profile_slots[i]);
 	}
@@ -96,7 +96,7 @@ uint32 inventory::pull_item_stack(item_id id, uint32 stack_count)
 
 bool inventory::equipe_item(slot_id s_id)
 {
-	if (s_id < 20) {
+	if (s_id < PROFILE_MAX) {
 		chat_send_simple_system_message("Cant equipe already equiped items!", parent);
 		return false;
 	}
@@ -108,8 +108,7 @@ bool inventory::equipe_item(slot_id s_id)
 
 	if (!s_r.isEmpty)
 	{
-		if (i_t->requiredLevel > parent->level)
-		{
+		if (i_t->requiredLevel > parent->level) {
 			message_system_send_simple("@347", parent);
 			return false;
 		}
@@ -118,8 +117,7 @@ bool inventory::equipe_item(slot_id s_id)
 		{
 			bool can = false;
 			for (size_t i = 0; i < i_t->requiredClasses.size(); i++)
-				if (i_t->requiredClasses[i] == player_get_class(parent->model))
-				{
+				if (i_t->requiredClasses[i] == player_get_class(parent->model)) {
 					can = true;
 					break;
 				}
@@ -130,13 +128,11 @@ bool inventory::equipe_item(slot_id s_id)
 			}
 		}
 
-		if (s_r._item->isBinded && s_r._item->binderDBId != parent->dbid)
-		{
+		if (s_r._item->isBinded && s_r._item->binderDBId != parent->dbid) {
 			message_system_send_simple("@347", parent); //not binded to you [bind is done on db-id]
 			return false;
 		}
-		else if (!s_r._item->isBinded && i_t->bind_type == BIND_ON_EQUIPE)
-		{
+		else if (!s_r._item->isBinded && i_t->bind_type == BIND_ON_EQUIPE) {
 			s_r._item->isBinded = 0x01;
 			s_r._item->binderDBId = parent->dbid;
 #ifdef _DEBUG
@@ -144,7 +140,7 @@ bool inventory::equipe_item(slot_id s_id)
 #endif
 
 		}
-	
+
 
 		EnterCriticalSection(&inv_lock);
 		e_item_category i_c = i_t->category;
@@ -168,7 +164,14 @@ bool inventory::equipe_item(slot_id s_id)
 				}
 				else
 				{
-					inventory_interchange_items((*this)[PROFILE_EARRING_L], s_r);
+					if ((*this)[PROFILE_RING_R]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_EARRING_L], s_r);
+					}
+					else if ((*this)[PROFILE_EARRING_L]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_EARRING_R], s_r);
+					}
+					else
+						inventory_interchange_items((*this)[PROFILE_EARRING_R], s_r);
 				}
 			}
 			else if (i_c == ring)
@@ -183,7 +186,14 @@ bool inventory::equipe_item(slot_id s_id)
 				}
 				else
 				{
-					inventory_interchange_items((*this)[PROFILE_RING_L], s_r);
+					if ((*this)[PROFILE_RING_R]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_RING_L], s_r);
+					}
+					else if ((*this)[PROFILE_RING_L]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_RING_R], s_r);
+					}
+					else
+						inventory_interchange_items((*this)[PROFILE_RING_R], s_r);
 				}
 			}
 			else if (i_c == brooch)
@@ -223,7 +233,9 @@ bool inventory::equipe_item(slot_id s_id)
 		case EQUIP_STYLE_BACK:
 			inventory_interchange_items((*this)[PROFILE_SKIN_BACK], s_r);
 			break;
-
+		case EQUIP_UNDERWEAR:
+			inventory_interchange_items((*this)[PROFILE_INNERWARE], s_r);
+			break;
 		default:
 			LeaveCriticalSection(&inv_lock);
 			return false;
@@ -246,7 +258,7 @@ bool inventory::equipe_item(slot_id s_id)
 
 		refresh_enchat_effect();
 		refresh_items_modifiers();
-		
+
 		player_send_stats(parent);
 
 		send();
@@ -272,8 +284,8 @@ bool inventory::unequipe_item(slot_id s_id)
 	inventory_interchange_items(profile_slots[s_id - 1], inventory_slots[i]);
 
 	player_send_external_change(parent, 1);
-	
-	
+
+
 	std::vector<const passivity_template*> passivities;
 	get_profile_passivities(passivities);
 	parent->lock_stats();
@@ -325,7 +337,7 @@ void inventory::send(byte show)
 	data->WriteInt32(0);
 
 	uint16 next; uint16 count = 0; bool i_t = false; uint16 t_count = 0;
-	for (size_t i = 0; i < 20; i++)
+	for (size_t i = 0; i < PROFILE_MAX; i++)
 	{
 		if (!profile_slots[i].isEmpty)
 		{
@@ -550,7 +562,7 @@ std::shared_ptr<item> inventory::get_item(entityId id)
 inventory_slot& inventory::operator[](slot_id id)
 {
 	EnterCriticalSection(&inv_lock);
-	if ((id) >= 0 && (id ) <= 20)
+	if ((id) >= 0 && (id) <= PROFILE_MAX)
 	{
 		LeaveCriticalSection(&inv_lock);
 		return profile_slots[(id)];
@@ -568,7 +580,7 @@ void inventory::clear()
 		slot_wipe(inventory_slots[i]);
 	}
 
-	for (size_t i = 0; i < 20; i++)
+	for (size_t i = 0; i < PROFILE_MAX; i++)
 	{
 		slot_wipe(profile_slots[i]);
 	}
@@ -619,14 +631,14 @@ slot_id inventory::get_profile_item_slot_id_by_eid(item_eid eid)
 
 uint8 inventory::get_profile_item_enchant_level(slot_id id)
 {
-	return (((id) >= 0) && ((id ) < 20)) ? (profile_slots[id]._item ? profile_slots[id ]._item->enchantLevel : 0x00) : 0x00;
+	return (((id) >= 0) && ((id) < PROFILE_MAX)) ? (profile_slots[id]._item ? profile_slots[id]._item->enchantLevel : 0x00) : 0x00;
 }
 
 void inventory::get_profile_passivities(std::vector<const passivity_template*>& out)
 {
 	EnterCriticalSection(&inv_lock);
 
-	for (uint32 i = 0; i < 14; i++)
+	for (uint32 i = 0; i < PROFILE_MAX; i++)
 		if (!profile_slots[i].isEmpty)
 			iventory_get_item_passivities(profile_slots[i]._item, out);
 
@@ -757,7 +769,7 @@ bool inventory::move_item(uint32 i_0, uint32 i_1)
 
 item_id inventory::get_profile_item(slot_id id)
 {
-	return (((id) >= 0) && ((id) < 20)) ? (profile_slots[id]._item ? profile_slots[id]._item->item_t->id : 0x00) : 0x00;
+	return (((id) >= 0) && ((id) < PROFILE_MAX)) ? (profile_slots[id]._item ? profile_slots[id]._item->item_t->id : 0x00) : 0x00;
 }
 
 
@@ -771,7 +783,7 @@ Stream * inventory::get_raw()
 
 	uint16 count = 0;
 	out->WritePos(0);
-	for (uint32 i = 0; i < 20; i++)
+	for (uint32 i = 0; i < PROFILE_MAX; i++)
 	{
 		if (!profile_slots[i].isEmpty)
 		{
@@ -1120,7 +1132,7 @@ void iventory_get_item_passivities(std::shared_ptr<item> it, std::vector<const p
 
 void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2)
 {
-	
+
 	if (!s1.isEmpty) {
 		s1._item->isBinded = 0x00;
 		s1._item->binderDBId = 0;

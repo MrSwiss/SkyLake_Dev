@@ -4,6 +4,7 @@
 #include "typeDefs.h"
 #include "win32.h"
 #include "serverEnums.h"
+#include "itemEnums.h"
 
 #include "entity.h"
 
@@ -108,7 +109,7 @@ public:
 
 	uint64					gold;
 
-	inventory_slot			profile_slots[20];
+	inventory_slot			profile_slots[PROFILE_MAX];
 	inventory_slot			inventory_slots[SC_INVENTORY_MAX_SLOTS];
 
 	std::shared_ptr<player> parent;
@@ -133,7 +134,7 @@ bool WINAPI slot_insert(inventory_slot &, item_id, uint32 stack_count);
 void WINAPI slot_wipe(inventory_slot &);
 void WINAPI slot_clear(inventory_slot&);
 
-static void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2);
+void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2);
 static void WINAPI inventory_write_item(inventory_slot *s1, uint32 ,Stream *);
 #endif
 

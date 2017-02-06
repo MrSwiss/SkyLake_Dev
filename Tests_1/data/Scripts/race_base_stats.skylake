@@ -2,7 +2,7 @@
 .human:0
 {
 
-
+threeHpRegen=5000
 }
 
 .highelf:1

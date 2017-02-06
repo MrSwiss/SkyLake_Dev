@@ -34,6 +34,7 @@ enum e_item_category : uint16
 	blaster,
 	gauntlet,
 	shuriken,
+	underwear,
 	accessoryHair,
 	weaponMaterial,
 	armorMaterial,
@@ -123,6 +124,7 @@ enum e_item_type : uint16
 	EQUIP_STYLE_WEAPON,
 	EQUIP_STYLE_BODY,
 	EQUIP_STYLE_BACK,
+	EQUIP_UNDERWEAR,
 };
 
 enum e_item_bound_type :byte
@@ -163,19 +165,19 @@ enum e_profile_slot_type: uint32
 
 
 	PROFILE_INNERWARE = 10,
-	PROFILE_MASK=11,
-	PROFILE_HEAD_ADRONMENT=12,
-	
+	PROFILE_HEAD_ADRONMENT=11,
+	PROFILE_MASK = 12,
 
 	PROFILE_SKIN_HEAD = 13,
 	PROFILE_SKIN_FACE = 14, //god
 	PROFILE_SKIN_WEAPON = 15,
 	PROFILE_SKIN_BODY=16, //good
 	PROFILE_SKIN_BACK=17, //good
-	PROFILE_BELT = 18,
 	
-
+	
+	PROFILE_BELT = 18,
 	PROFILE_BROOCH = 19,
+	
 	
 
 	PROFILE_MAX

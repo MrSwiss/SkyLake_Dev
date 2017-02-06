@@ -334,7 +334,7 @@ bool WINAPI chat_process_gm_commands(chat_message * msg)
 				d.WriteInt16(4);
 				d.WriteInt16(S_RETURN_TO_LOBBY);
 
-				
+
 				connection_send(msg->p_->con, &d);
 				Sleep(100);
 				msg->p_->con->_inLobby = false;
