@@ -82,6 +82,13 @@ specialRegenRate=3
 
 .reaper:8
 {
+attackSpeed=240
+movementSpeed=180
+runSpeed=210
+hp=50000
+mp=10000
+fiveHpRegen=500
+fiveMpRegen=100
 
 }
 
@@ -137,7 +144,7 @@ runSpeed=310
 
 special=5500
 specialRegen=250
-specialRegenRate=5
+specialRegenRate=1
 }
 
 .general:12

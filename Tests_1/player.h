@@ -18,7 +18,7 @@
 class connection;
 class player : public entity
 {
-	CRITICAL_SECTION				stats_lock;
+private:
 	double	three_regen, five_regen, special_regen;
 	uint32 hp_diff, mp_diff;
 	Stream data;
@@ -61,6 +61,9 @@ public:
 
 	player(entityId, uint32 db_id, std::shared_ptr<connection>);
 	~player();
+
+private:
+	CRITICAL_SECTION					stats_lock;
 };
 
 uint32 WINAPI				player_calculate_model(e_player_class, e_player_gender, e_player_race);
@@ -70,9 +73,6 @@ void WINAPI					player_write_spawn_packet(std::shared_ptr<player>, Stream&);
 void WINAPI					player_send_stats(p_ptr);
 void WINAPI					player_recalculate_inventory_stats(p_ptr);
 void WINAPI					player_recalculate_stats(p_ptr);
-
-void WINAPI					player_process_passivitie(p_ptr, const passivity_template*);
-static void WINAPI			player_apply_passivitie(p_ptr, const passivity_template*);
 
 e_player_class WINAPI		player_get_class(uint32 model);
 e_player_race WINAPI		player_get_race(uint32 model);

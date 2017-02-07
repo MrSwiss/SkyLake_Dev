@@ -13,6 +13,7 @@
 #include "stringUtils.h"
 #include "world_server.h"
 #include "active_server.h"
+#include "p_processor.h"
 
 bool WINAPI chat_init()
 {
@@ -295,6 +296,7 @@ bool WINAPI chat_process_gm_commands(chat_message * msg)
 
 
 					if (val > 12 && val <= 15) {
+						msg->p_->i_.profile_slots[slot]._item->isMasterworked = 0x01;
 						msg->p_->i_.profile_slots[slot]._item->isAwakened = 0x01;
 					}
 					else {
@@ -303,7 +305,7 @@ bool WINAPI chat_process_gm_commands(chat_message * msg)
 
 
 					msg->p_->i_.refresh_enchat_effect();
-					msg->p_->i_.send(1);
+					msg->p_->i_.send(0);
 					player_send_stats(msg->p_);
 					player_send_external_change(msg->p_, 1);
 				}
@@ -360,6 +362,36 @@ bool WINAPI chat_process_gm_commands(chat_message * msg)
 			}
 			else if (stringStartsWith(cmd, "external")) {
 				player_send_external_change(msg->p_, 1);
+			}
+			else if (stringStartsWith(cmd, "roll")) {
+				uint32 slot = 0;
+				sscanf_s(cmd.c_str(), "roll %d", &slot);
+
+				if (slot < 20) {
+					if (!msg->p_->i_.profile_slots[slot].isEmpty) {
+						passivity_roll_item(msg->p_->i_.profile_slots[slot]._item);
+					}
+					else {
+						chat_send_simple_system_message("Slot empty!", msg->p_);
+						return true;
+					}
+				}
+				else if (slot >= 40 && (slot-40) < msg->p_->i_.slot_count) {
+					if (!msg->p_->i_.inventory_slots[slot - 40].isEmpty) {
+						passivity_roll_item(msg->p_->i_.inventory_slots[slot - 40]._item);
+					}
+					else {
+						chat_send_simple_system_message("Slot empty!", msg->p_);
+						return true;
+					}
+				}
+				else {
+					chat_send_simple_system_message("Index not inside inventory or profile!", msg->p_);
+					return true;
+				}
+
+				chat_send_simple_system_message("Rolled index:" + std::to_string(slot), msg->p_);
+				msg->p_->i_.send();
 			}
 			else
 			{

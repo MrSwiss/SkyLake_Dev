@@ -1,6 +1,13 @@
 #include "p_processor.h"
 #include "player.h"
 #include "passivitytemplate.h"
+#include "inventory.h"
+#include "itemtemplate.h"
+#include "enchantdatatemplate.h"
+#include "equipmentdatatemplate.h"
+#include "passivitycategorytemplate.h"
+
+#include <random>
 
 void WINAPI passivity_processor_init() {
 	p_funcs[INCREASE_MAX_HP] = p_incrase_max_hp;
@@ -40,10 +47,73 @@ void WINAPI passivity_processor_init() {
 	return;
 }
 
-void WINAPI  passivity_proces(p_ptr p, const passivity_template *t) {
+void WINAPI passivity_proces(p_ptr p, const passivity_template *t) {
 	if (!t || t->type >= P_TYPE_MAX) return;
 	if (p_funcs[t->type])p_funcs[t->type](p, t);
 	return;
+}
+
+
+
+
+
+
+void WINAPI passivity_roll_item(std::shared_ptr<item> i) {
+	i->passivities.clear();
+
+	const passivity_template * temp = nullptr;
+
+	if (i->item_t->passivityCategory) {
+		if ((temp = passivity_category_get_random(i->item_t->passivityCategory)))
+			i->passivities.push_back(temp);
+	}
+
+	if (i->item_t->enchant && i->item_t->masterpieceEnchant) {
+		if (i->isAwakened) {
+			for (size_t j = 0; j < i->item_t->masterpieceEnchant->effects.size(); j++) {
+					if ((temp = passivity_category_get_random(i->item_t->masterpieceEnchant->effects[j].passivitiesCategory)))
+						i->passivities.push_back(temp);
+			}
+		}
+		else if (i->isMasterworked) {
+			for (size_t j = 0; j < i->item_t->masterpieceEnchant->effects.size(); j++) {
+				if (i->item_t->masterpieceEnchant->effects[j].step <= 12)
+					if ((temp = passivity_category_get_random(i->item_t->masterpieceEnchant->effects[j].passivitiesCategory)))
+						i->passivities.push_back(temp);
+			}
+		}
+		else {
+			for (size_t j = 0; j < i->item_t->enchant->effects.size(); j++) {
+				if ((temp = passivity_category_get_random(i->item_t->enchant->effects[j].passivitiesCategory)))
+					i->passivities.push_back(temp);
+			}
+		}
+	}
+
+	
+	if (i->isMasterworked) {
+		for (size_t j = 0; j < i->item_t->masterpiecePassivities.size(); j++)
+			i->passivities.push_back(i->item_t->masterpiecePassivities[j]);
+	}
+	else {
+		for (size_t j = 0; j < i->item_t->passivities.size(); j++)
+			i->passivities.push_back(i->item_t->passivities[j]);
+	}
+
+	return;
+}
+
+const passivity_template * WINAPI passivity_category_get_random(passivity_category * c)
+{
+	if (c->passivities.size() > 1) {
+		uint32 rand_seed = (uint32)(rand() % (c->passivities.size() - 1));
+		return c->passivities[rand_seed];
+	}
+	else if (c->passivities.size() == 1) {
+		return c->passivities[0];
+	}
+
+	return nullptr;
 }
 
 

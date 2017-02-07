@@ -400,7 +400,7 @@ void WINAPI inventory_write_item(inventory_slot * slot, uint32 db_id, Stream * d
 	data->WriteFloat(0);
 	data->WriteInt32(slot->_item->binderDBId); //binder  ?
 	data->WriteInt32(0); //disabled  ?
-	data->WriteUInt8(slot->_item->isAwakened);
+	data->WriteUInt8(slot->_item->isAwakened); // slot->_item->isAwakened
 	data->WriteInt32(0); //unk
 
 	data->WriteInt32(0);
@@ -631,14 +631,14 @@ void inventory::refresh_enchat_effect()
 				profile_slots[i]._item->item_t->equipmentData) {
 				for (size_t j = 0; j < profile_slots[i]._item->item_t->enchant->stats.size(); j++)
 				{
-					if (profile_slots[i]._item->item_t->enchant->stats[i].enchantStep > 12)
+					if (profile_slots[i]._item->item_t->enchant->stats[j].enchantStep > 12)
 					{
-						if (profile_slots[i]._item->item_t->enchant->stats[i].enchantStep > profile_slots[i]._item->enchantLevel)
+						if (profile_slots[i]._item->item_t->enchant->stats[j].enchantStep > profile_slots[i]._item->enchantLevel)
 							break;
 
-						mod = (profile_slots[i]._item->item_t->enchant->stats[i].rate - ((int)profile_slots[i]._item->item_t->enchant->stats[i].rate));
+						mod = (profile_slots[i]._item->item_t->enchant->stats[j].rate - ((int)profile_slots[i]._item->item_t->enchant->stats[j].rate));
 
-						switch (profile_slots[i]._item->item_t->enchant->stats[i].kind)
+						switch (profile_slots[i]._item->item_t->enchant->stats[j].kind)
 						{
 						case attack:
 							parent->stats.enchant_attack += (uint32)(profile_slots[i]._item->item_t->equipmentData->maxAttack * mod);
@@ -657,10 +657,10 @@ void inventory::refresh_enchat_effect()
 					}
 					else
 					{
-						mod = profile_slots[i]._item->enchantLevel * (profile_slots[i]._item->item_t->enchant->stats[i].rate -
-							((int)profile_slots[i]._item->item_t->enchant->stats[i].rate)); //get only fractional part
+						mod = profile_slots[i]._item->enchantLevel * (profile_slots[i]._item->item_t->enchant->stats[j].rate -
+							((int)profile_slots[i]._item->item_t->enchant->stats[j].rate)); //get only fractional part
 
-						switch (profile_slots[i]._item->item_t->enchant->stats[i].kind)
+						switch (profile_slots[i]._item->item_t->enchant->stats[j].kind)
 						{
 						case attack:
 							parent->stats.enchant_attack += (uint32)(profile_slots[i]._item->item_t->equipmentData->maxAttack * mod);
@@ -982,13 +982,8 @@ bool WINAPI inventory_build_item(inventory_slot& slot, item_id id)
 	slot.isEmpty = 0;
 
 	const item_template * t = slot._item->item_t;
-	if (t->equipmentData && t->equipmentData->passivityG)
-		slot._item->passivities.push_back(t->equipmentData->passivityG);
-
-	if (t->enchantEnable && t->enchant)
-	{
-		//EquipmentService::RollEnchantPassivities(item->_enchant, slot->_info->_passivities); //todo
-	}
+	
+	passivity_roll_item(slot._item);
 
 	return true;
 }

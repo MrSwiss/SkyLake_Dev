@@ -5,13 +5,18 @@
 #include "win32.h"
 #include "passivityEnums.h"
 
+struct item;
 struct  passivity_template;
+struct passivity_category;
 typedef void(WINAPI *p_fun_ptr)(p_ptr, const passivity_template*);
 
 static p_fun_ptr p_funcs[P_TYPE_MAX];
 
 void WINAPI passivity_processor_init();
 void WINAPI passivity_proces(p_ptr, const passivity_template*);
+
+void WINAPI passivity_roll_item(std::shared_ptr<item>);
+const passivity_template* WINAPI passivity_category_get_random(passivity_category*);
 
 
 static void WINAPI p_incrase_max_mp(p_ptr, const passivity_template*);
