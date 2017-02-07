@@ -71,6 +71,40 @@ bool inventory::insert_or_stack_item(item_id id, uint32 stack_count)
 	return result;
 }
 
+bool inventory::insert_or_stack_item(std::shared_ptr<item> it)
+{
+	uint32 residual = it->stackCount; bool result = false;
+	EnterCriticalSection(&inv_lock);
+
+	for (size_t i = 0; i < slot_count; i++)
+		if (!inventory_slots[i].isEmpty && inventory_slots[i]._item &&
+			inventory_slots[i]._item->item_t->id == it->item_t->id)
+			if (!(residual = item_stack(inventory_slots[i]._item, it->stackCount, STACK_FRAGMENT)))
+			{
+				entity_manager::destroy_item(it->eid); //we stacked the item
+				result = true;
+				break;
+			}
+
+
+	if (residual) {
+		it->stackCount = residual;
+		for (size_t i = 0; i < slot_count; i++)
+			if (inventory_slots[i].isEmpty)
+			{
+				inventory_slots[i]._item = std::move(it); //we added item into inventory
+				inventory_slots[i].isEmpty = 0x01;
+				result = true;
+				break;
+			}
+	}
+	if (result)
+		recalculate_levels();
+
+	LeaveCriticalSection(&inv_lock);
+	return result;
+}
+
 uint32 inventory::pull_item_stack(item_id id, uint32 stack_count)
 {
 	EnterCriticalSection(&inv_lock);
@@ -995,7 +1029,7 @@ bool WINAPI inventory_new(std::shared_ptr<player> p)
 	inventory * inv = &p->i_;
 
 
-	if (pClass == WARRIOR || pClass == ARCHER || pClass == SLAYER || pClass == REAPER)
+	if (pClass == WARRIOR || pClass == ARCHER || pClass == SLAYER /*|| pClass == REAPER*/)
 	{
 		inventory_build_item((*inv)[PROFILE_ARMOR], 15004);
 		inventory_build_item((*inv)[PROFILE_GLOVES], 15005);

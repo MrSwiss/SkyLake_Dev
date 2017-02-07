@@ -13,7 +13,7 @@ struct bind_contract : public contract
 protected:
 	int32	progress_begin;
 
-	bool internalInit();
+	bool internal_init();
 };
 
 #endif

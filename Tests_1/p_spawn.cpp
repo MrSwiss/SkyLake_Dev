@@ -94,6 +94,7 @@ void p_spawn::bordacast(Stream * data_m)
 		connection_send(temp->p->con, data_m);
 		temp = temp->next;
 	}
+
 }
 
 void p_spawn::clear()

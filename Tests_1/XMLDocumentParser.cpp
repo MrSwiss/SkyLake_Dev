@@ -2658,7 +2658,7 @@ void XMLDocumentParser::InitItemsDictionary()
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ARCHER", ARCHER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("PRIEST", PRIEST));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("MYSTIC", MYSTIC));
-	playerClassDictionary.insert(std::pair<std::string, e_player_class>("REAPER", REAPER));
+	playerClassDictionary.insert(std::pair<std::string, e_player_class>("SOULLESS", REAPER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ENGINEER", ENGINEER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("FIGHTER", FIGHTER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ASSASSIN", ASSASSIN));

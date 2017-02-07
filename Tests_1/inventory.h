@@ -67,6 +67,8 @@ public:
 	~inventory();
 
 	bool					insert_or_stack_item(item_id, uint32 stack_count);
+	bool					insert_or_stack_item(std::shared_ptr<item>);
+
 	uint32					pull_item_stack(item_id, uint32 stack_count);
 
 	bool					equipe_item(slot_id);

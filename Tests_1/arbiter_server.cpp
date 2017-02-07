@@ -347,8 +347,6 @@ DWORD WINAPI arbiter_server_accept_func(void* argv)
 	return 0;
 }
 
-
-
 void WINAPI arbiter_server_process_job(void* j, e_job_type type, sql::Connection * con)
 {
 	switch (type)
@@ -368,26 +366,26 @@ void WINAPI arbiter_server_process_job(void* j, e_job_type type, sql::Connection
 	{
 		j_b_move * j_ = (j_b_move*)j;
 
-		Stream data = Stream();
-		data.Resize(47);
-		data.WriteInt16(47);
-		data.WriteInt16(S_USER_LOCATION);
-		data.WriteWorldId(j_->p_);
-		data.WriteFloat(j_->p_->position.x.load());
-		data.WriteFloat(j_->p_->position.y.load());
-		data.WriteFloat(j_->p_->position.z.load());
-		data.WriteInt32(j_->p_->position.heading.load());
-		data.WriteInt16(j_->p_->stats.get_movement_speed(j_->p_->status)); //todo
-		data.WriteFloat(j_->p_->position.t_x.load());
-		data.WriteFloat(j_->p_->position.t_y.load());
-		data.WriteFloat(j_->p_->position.t_z.load());
-		data.WriteInt32(j_->t_);
-		data.WriteUInt8(1);
+		//Stream data = Stream();
+		//data.Resize(47);
+		//data.WriteInt16(47);
+		//data.WriteInt16(S_USER_LOCATION);
+		//data.WriteWorldId(j_->p_);
+		//data.WriteFloat(j_->p_init[0]);
+		//data.WriteFloat(j_->p_init[1]);
+		//data.WriteFloat(j_->p_init[2]);
+		//data.WriteInt32(j_->p_->position.heading.load());
+		//data.WriteInt16(j_->p_->stats.get_movement_speed(j_->p_->status)); //todo
+		//data.WriteFloat(j_->p_->position.x.load());
+		//data.WriteFloat(j_->p_->position.y.load());
+		//data.WriteFloat(j_->p_->position.z.load());
+		//data.WriteInt32(j_->t_);
+		//data.WriteUInt8(1);
 
 
 
 		j_->p_->spawn.filter(j_->p_m);
-		j_->p_->spawn.bordacast(&data);
+		//j_->p_->spawn.bordacast(&data);
 
 	}break;
 

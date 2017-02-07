@@ -56,8 +56,6 @@ void WINAPI passivity_proces(p_ptr p, const passivity_template *t) {
 
 
 
-
-
 void WINAPI passivity_roll_item(std::shared_ptr<item> i) {
 	i->passivities.clear();
 
@@ -112,7 +110,6 @@ const passivity_template * WINAPI passivity_category_get_random(passivity_catego
 	else if (c->passivities.size() == 1) {
 		return c->passivities[0];
 	}
-
 	return nullptr;
 }
 

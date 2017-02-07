@@ -6,7 +6,7 @@
 #include "passivityEnums.h"
 
 struct item;
-struct  passivity_template;
+struct passivity_template;
 struct passivity_category;
 typedef void(WINAPI *p_fun_ptr)(p_ptr, const passivity_template*);
 

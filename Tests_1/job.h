@@ -100,7 +100,9 @@ struct j_b_despawn
 
 struct j_move
 {
-	j_move(std::shared_ptr<player> , e_player_move_type);
+	j_move(std::shared_ptr<player> ,float[3], e_player_move_type);
+
+	const float p_init[3];
 
 	const std::shared_ptr<player> p_;
 	const e_player_move_type t_;
@@ -108,8 +110,9 @@ struct j_move
 
 struct j_b_move
 {
-	j_b_move(std::shared_ptr<player>, e_player_move_type);
+	j_b_move(std::shared_ptr<player>, e_player_move_type, const float[3]);
 
+	const float p_init[3];
 	const std::shared_ptr<player> p_;
 	const e_player_move_type t_;
 	

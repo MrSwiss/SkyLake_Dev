@@ -497,11 +497,11 @@ void WINAPI player_recalculate_inventory_stats(p_ptr p)
 	p->stats.clear_bonus();
 	std::vector<const passivity_template*> passivities;
 	p->lock_stats();
+	p->i_.get_profile_passivities(passivities);
+	p->unlock_stats();
 	for (size_t i = 0; i < passivities.size(); i++) {
 		passivity_proces(p, passivities[i]);
 	}
-	p->unlock_stats();
-
 	return;
 }
 

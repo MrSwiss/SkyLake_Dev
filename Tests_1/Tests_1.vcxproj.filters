@@ -220,6 +220,9 @@
     <ClCompile Include="p_processor.cpp">
       <Filter>Framework\p_processor</Filter>
     </ClCompile>
+    <ClCompile Include="enchant_contract.cpp">
+      <Filter>Framework\contract\contracts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mathUtils.h">
@@ -429,6 +432,9 @@
     </ClInclude>
     <ClInclude Include="win32.h">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="enchant_contract.h">
+      <Filter>Framework\contract\contracts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

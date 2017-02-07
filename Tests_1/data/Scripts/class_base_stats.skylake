@@ -7,8 +7,8 @@ mp=500
 
 
 attackSpeed=210
-movementSpeed=210
-runSpeed=300
+movementSpeed=140
+runSpeed=310
 
 fiveHpRegen=100
 threeHpRegen=0
@@ -139,8 +139,8 @@ threeHpRegen=500
 fiveMpRegen=550
 
 attackSpeed=180
-movementSpeed=240
-runSpeed=310
+movementSpeed=180
+runSpeed=210
 
 special=5500
 specialRegen=250
