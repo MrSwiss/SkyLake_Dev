@@ -83,7 +83,7 @@ bool WINAPI world_server_init()
 	if (WSA_INVALID_EVENT == (w_server.shutdown_event = WSACreateEvent()))
 		return false;
 
-	
+
 	w_server.w_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (!w_server.w_iocp) return false;
 
@@ -115,12 +115,12 @@ void WINAPI world_server_release()
 		for (uint32 i = 0; i < w_server.no_of_threads; i++)
 			if (w_server.world_worker_threads[i])
 				WaitForSingleObject(w_server.world_worker_threads[i]->w_thread, INFINITE);
-				
+
 
 		delete[] w_server.world_worker_threads;
 		w_server.world_worker_threads = NULL;
 	}
-	
+
 	WSACloseEvent(w_server.shutdown_event);
 
 	//todo release world_data ?
@@ -168,7 +168,7 @@ DWORD WINAPI world_worker(void* argv)
 
 		if (!ret_val) break;
 	}
-	
+
 	for (size_t i = 0; i < config::server.world_job_pull_cout; i++)
 		if (this_->j_c[i].job) delete this_->j_c[i].job;
 
@@ -338,7 +338,7 @@ void WINAPI world_player_move(j_move * j)
 		return;
 	}
 
-	std::unique_ptr<j_b_move> j_m = std::make_unique<j_b_move>(j->p_, j->t_);
+	std::unique_ptr<j_b_move> j_m = std::make_unique<j_b_move>(j->p_, j->t_, j->p_init);
 	a_->collect_visible_players(j_m->p_m, j->p_);
 	arbiter_server_process_job_async(j_m.release(), J_A_BROADCAST_PLAYER_MOVE);
 	return;

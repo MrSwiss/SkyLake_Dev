@@ -26,6 +26,7 @@ enum server_contants : ulong
 	SC_CHAT_MAX_MESSAGE_LENGTH = 270,
 	SC_INVENTORY_MAX_SLOTS = 104, //8 * 13
 	SC_INVENTORY_MIN_SLOTS = 32, //8 * 4
+	SC_INVENTORY_PROFILE_SLOTS_COUNT = 21,
 };
 
 enum server_buffer_settings :uint32

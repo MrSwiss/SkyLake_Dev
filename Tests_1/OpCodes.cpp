@@ -31,6 +31,7 @@
 #include "active_server.h"
 #include "skylake_stats.h"
 #include "bind_contract.h"
+#include "enchant_contract.h"
 
 bool opcode_init()
 {
@@ -678,7 +679,7 @@ bool WINAPI op_create_player(std::shared_ptr<connection> c, void* argv[])
 		p->pClass = (e_player_class)pClass;
 		p->pGender = (e_player_gender)pGender;
 		p->pRace = (e_player_race)pRace;
-		p->level = 1;
+		p->level = pClass == REAPER ? 40 : 1;
 
 		p->position.continent_id = config::zone.zone_start_continent;
 		p->position.channel = config::zone.zone_start_channel - 1;
@@ -1788,6 +1789,11 @@ bool WINAPI op_player_location(std::shared_ptr<connection>c, void* argv[])
 #endif
 	std::shared_ptr<player> p = c->_players[c->_selected_player];
 
+	float p_init[3];
+	p_init[0] = a_load(p->position.x);
+	p_init[1] = a_load(p->position.y);
+	p_init[2] = a_load(p->position.z);
+
 	p->position.x.store(c->_recvBuffer.data.ReadFloat());
 	p->position.y.store(c->_recvBuffer.data.ReadFloat());
 	p->position.z.store(c->_recvBuffer.data.ReadFloat());
@@ -1797,8 +1803,32 @@ bool WINAPI op_player_location(std::shared_ptr<connection>c, void* argv[])
 	p->position.t_y.store(c->_recvBuffer.data.ReadFloat());
 	p->position.t_z.store(c->_recvBuffer.data.ReadFloat());
 	e_player_move_type t = (e_player_move_type)c->_recvBuffer.data.ReadInt32();
+	uint16 speed = c->_recvBuffer.data.ReadUInt16();
+	uint16 time = c->_recvBuffer.data.ReadInt16();
 
-	return world_server_process_job_async(new j_move(std::move(p), t), J_W_PLAYER_MOVE);
+	//printf("MOVE [%d] [%lu]\n", speed, time);
+
+	Stream data = Stream();
+	data.Resize(47);
+	data.WriteInt16(47);
+	data.WriteInt16(S_USER_LOCATION);
+	data.WriteWorldId(p);
+	data.WriteFloat(a_load(p->position.x));
+	data.WriteFloat(a_load(p->position.y));
+	data.WriteFloat(a_load(p->position.z));
+	data.WriteInt32(p->position.heading.load());
+	data.WriteInt16(t == P_JUMP_START ? speed : p->stats.get_movement_speed(p->status)); //todo 
+	data.WriteFloat(a_load(p->position.t_x));
+	data.WriteFloat(a_load(p->position.t_y));
+	data.WriteFloat(a_load(p->position.t_z));
+	data.WriteInt32(t);
+	data.WriteUInt8(1);
+
+	if (!world_server_process_job_async(new j_move(p, p_init, t), J_W_PLAYER_MOVE))
+		return false;
+
+	p->spawn.bordacast(&data);
+	return true;
 }
 
 bool WINAPI op_event_guide(std::shared_ptr<connection>, void* argv[])
@@ -2030,9 +2060,14 @@ bool WINAPI op_chat(std::shared_ptr<connection> c, void * argv[])
 bool WINAPI op_del_item(std::shared_ptr<connection> c, void * argv[])
 {
 	c->_recvBuffer.data._pos = 8;
-	uint32 slot = c->_recvBuffer.data.ReadInt32();
-
-	slot_wipe(c->_players[c->_selected_player]->i_.inventory_slots[slot]);
+	uint32 slot = c->_recvBuffer.data.ReadUInt32();
+	uint32 stack = c->_recvBuffer.data.ReadUInt32();
+	c->_players[c->_selected_player]->i_.lock();
+	c->_players[c->_selected_player]->i_.inventory_slots[slot]._item->stackCount -= stack;
+	if (c->_players[c->_selected_player]->i_.inventory_slots[slot]._item->stackCount <= 0) {
+		slot_wipe(c->_players[c->_selected_player]->i_.inventory_slots[slot]);
+	}
+	c->_players[c->_selected_player]->i_.unlock();
 	c->_players[c->_selected_player]->i_.send();
 	return true;
 }
@@ -2333,19 +2368,57 @@ bool WINAPI op_bind_item_execute(std::shared_ptr<connection> c, void * argv[])
 	return true;
 }
 
-bool WINAPI op_execute_temper(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_execute_temper(std::shared_ptr<connection> c, void * argv[])
 {
-	return false;
+	enchant_contract * contract = (enchant_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENCHANT_CONTRACT);
+	if (contract) {
+		contract->try_enchant();
+	}
+	else
+		if (c->_account.isGm) {
+			chat_send_simple_system_message("ERROR 10005 [ITEM ENCHANT FAILED]", c->_players[c->_selected_player]);
+		}
+
+	return true;
 }
 
 bool WINAPI op_play_execute_temper(std::shared_ptr<connection>, void * argv[])
 {
+	//TODO send social 11
 	return false;
 }
 
-bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection> c, void * argv[])
 {
-	return false;
+	uint32 slot = c->_recvBuffer.data.ReadUInt32();
+	uint32 i_eid = c->_recvBuffer.data.ReadUInt32();
+	uint32 unk = c->_recvBuffer.data.ReadUInt32();
+	uint32 i_id = c->_recvBuffer.data.ReadUInt32();
+	uint32 count = c->_recvBuffer.data.ReadUInt32();
+
+	enchant_contract * contract = (enchant_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENCHANT_CONTRACT);
+	if (contract) {
+		if (slot == 0) {
+			if (!contract->add_item_to_enchant(unk, i_eid, 0, 0)) {
+				if (c->_account.isGm) {
+					chat_send_simple_system_message("ERROR 10002 [ADD ITEM TO ENCHANT FAILED]", c->_players[c->_selected_player]);
+				}
+			}
+		}
+		else if (slot == 1 || slot == 2) {
+			if (!contract->add_material_to_enchant_process(i_eid, count, slot)) {
+				if (c->_account.isGm) {
+					chat_send_simple_system_message("ERROR 10003 [ADD MATERIAL ITEM " + std::to_string(slot) + " TO ENCHANT FAILED]", c->_players[c->_selected_player]);
+				}
+			}
+		}
+		else {
+			if (c->_account.isGm) {
+				chat_send_simple_system_message("ERROR 10004 [UNK SLOT ID:" + std::to_string(slot) + "]", c->_players[c->_selected_player]);
+			}
+		}
+	}
+	return true;
 }
 
 bool WINAPI op_check_unidentify_items(std::shared_ptr<connection>, void * argv[])

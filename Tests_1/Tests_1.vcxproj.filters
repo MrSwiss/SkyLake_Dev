@@ -79,6 +79,9 @@
     <Filter Include="Framework\contract\contracts">
       <UniqueIdentifier>{470ed12e-0175-45e4-807f-a9978671acba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Framework\p_processor">
+      <UniqueIdentifier>{b2c8b0ba-2f8e-4d55-bbaf-04c304667a47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -212,6 +215,12 @@
       <Filter>Framework\contract</Filter>
     </ClCompile>
     <ClCompile Include="bind_contract.cpp">
+      <Filter>Framework\contract\contracts</Filter>
+    </ClCompile>
+    <ClCompile Include="p_processor.cpp">
+      <Filter>Framework\p_processor</Filter>
+    </ClCompile>
+    <ClCompile Include="enchant_contract.cpp">
       <Filter>Framework\contract\contracts</Filter>
     </ClCompile>
   </ItemGroup>
@@ -391,9 +400,6 @@
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="win32.h">
-      <Filter>Net</Filter>
-    </ClInclude>
     <ClInclude Include="active_server.h">
       <Filter>active_server</Filter>
     </ClInclude>
@@ -420,6 +426,15 @@
     </ClInclude>
     <ClInclude Include="passivityEnums.h">
       <Filter>Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="p_processor.h">
+      <Filter>Framework\p_processor</Filter>
+    </ClInclude>
+    <ClInclude Include="win32.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="enchant_contract.h">
+      <Filter>Framework\contract\contracts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

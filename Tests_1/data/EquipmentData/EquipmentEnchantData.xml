@@ -5066,9 +5066,9 @@
 <Effect step="5" passivityCategoryId="120304"/>
 <Effect step="7" passivityCategoryId="120304"/>
 <Effect step="9" passivityCategoryId="120304"/>
-<Effect step="10" passivityCategoryId="220000"/>
-<Effect step="11" passivityCategoryId="220001"/>
-<Effect step="12" passivityCategoryId="220002"/>
+<Effect step="10" passivityCategoryId="120304"/>
+<Effect step="11" passivityCategoryId="120304"/>
+<Effect step="12" passivityCategoryId="120304"/>
 <BasicStat kind="defence" rate="1.045"/>
 <BasicStat kind="balance" rate="1.07"/>
 <BasicStat kind="defence" rate="1.06" enchantStep="13"/>
@@ -5078,21 +5078,21 @@
 </EnchantData>
 <EnchantData>
 <Enchant id="20314">
-<Effect step="3" passivityCategoryId="20305"/>
-<Effect step="6" passivityCategoryId="20305"/>
-<Effect step="9" passivityCategoryId="20305"/>
+<Effect step="3" passivityCategoryId="120304"/>
+<Effect step="6" passivityCategoryId="120304"/>
+<Effect step="9" passivityCategoryId="120304"/>
 <BasicStat kind="defence" rate="1.045"/>
 <BasicStat kind="balance" rate="1.07"/>
 </Enchant>
 </EnchantData>
 <EnchantData>
 <Enchant id="120314">
-<Effect step="3" passivityCategoryId="120305"/>
-<Effect step="6" passivityCategoryId="120305"/>
+<Effect step="3" passivityCategoryId="120304"/>
+<Effect step="6" passivityCategoryId="120304"/>
 <Effect step="9" passivityCategoryId="120305"/>
-<Effect step="10" passivityCategoryId="223020"/>
-<Effect step="11" passivityCategoryId="223021"/>
-<Effect step="12" passivityCategoryId="223022"/>
+<Effect step="10" passivityCategoryId="120304"/>
+<Effect step="11" passivityCategoryId="120304"/>
+<Effect step="12" passivityCategoryId="120304"/>
 <BasicStat kind="defence" rate="1.045"/>
 <BasicStat kind="balance" rate="1.07"/>
 <BasicStat kind="defence" rate="1.06" enchantStep="13"/>

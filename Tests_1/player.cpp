@@ -8,6 +8,7 @@
 #include "servertime.h"
 #include <sstream>
 
+#include "p_processor.h"
 
 void player::update(double dt, double elapsed)
 {
@@ -297,6 +298,8 @@ void WINAPI player_load_user_settings(std::shared_ptr<player> p, sql::Connection
 	data.SetEnd();
 	data.WritePos(0);
 	connection_send(p->con, &data);
+
+	return;
 }
 
 bool WINAPI player_send_external_change(std::shared_ptr<player> p, byte broadcast)
@@ -446,6 +449,8 @@ void WINAPI player_write_spawn_packet(std::shared_ptr<player> p, Stream & data_m
 	data_m.WritePos(details2Pos);
 	data_m.Write(p->details2, SC_PLAYER_DETAILS_2_BUFFER_SIZE);
 	data_m.WritePos(0);
+
+	return;
 }
 
 void WINAPI player_send_stats(p_ptr p)
@@ -524,6 +529,24 @@ void WINAPI player_send_stats(p_ptr p)
 	data->WriteFloat(1.0f);	//scale?
 	data->WritePos(0);
 	connection_send(p->con, data.get());
+
+	return;
+}
+
+void WINAPI player_recalculate_inventory_stats(p_ptr p)
+{
+	p->i_.refresh_enchat_effect();
+	p->i_.refresh_items_modifiers();
+
+	p->stats.clear_bonus();
+	std::vector<const passivity_template*> passivities;
+	p->lock_stats();
+	p->i_.get_profile_passivities(passivities);
+	p->unlock_stats();
+	for (size_t i = 0; i < passivities.size(); i++) {
+		passivity_proces(p, passivities[i]);
+	}
+	return;
 }
 
 void WINAPI player_recalculate_stats(p_ptr p)
@@ -534,155 +557,16 @@ void WINAPI player_recalculate_stats(p_ptr p)
 	p->i_.get_profile_passivities(passivities);
 
 	p->lock_stats();
-
 	for (size_t i = 0; i < passivities.size(); i++) {
-		player_process_passivitie(p, passivities[i]);
+		passivity_proces(p, passivities[i]);
 	}
 	p->unlock_stats();
 
 	player_send_stats(p);
-}
-
-void WINAPI player_process_passivitie(p_ptr p, const passivity_template * t)
-{
-	if (!t) return;
-
-	e_passivity_type type = (e_passivity_type)t->type;
-
-	switch (type)
-	{
-	case INCREASE_MAX_HP: {
-		if (t->method == 2) { //value
-
-		}
-		else if (t->method == 3) { //percentage
-
-
-		}
-	}break;
-	case INCREASE_MAX_MP: {
-		if (t->method == 2) { //value
-
-
-		}
-		else if (t->method == 3) { //percentage
-
-
-		}
-	}break;
-
-	case DISSIPATE_EFFECT_ETCHING:
-	case DISABLE: {
-
-	}break;
-
-	case INCREASE_POWER: {
-
-	}break;
-	case INCREASE_ENDURANCE: {
-
-	}break;
-	case INCREASE_MOVEMENT_SPEED: {
-
-	}break;
-	case INCREASE_CRIT_FACTOR: {
-
-	}break;
-	case INCREASE_DAMAGE_BY: {
-
-	}break;
-	case INCREASE_IMPACT_FACTOR: {
-
-	}break;
-	case INCREASE_BALANCE_FACOTR: {
-
-	}break;
-	case INCREASE_WEAKENING_APPLY_RATE: {
-
-	}break;
-	case INCREASE_PERIODIC_APPLY_RATE: {
-
-	}break;
-	case INCREASE_STUN_APPLY_RATE: {
-
-	}break;
-	case INCREASE_WEAKENING_RESISTANCE: {
-
-	}break;
-	case INCREASE_PERIODIC_RESISTANCE: {
-
-	}break;
-	case INCREASE_STUN_RESISTANCE: {
-
-	}break;
-	case INCREASE_CRIT_POWER: {
-
-	}break;
-	case SKILLS_PRODUCES_LESS_AGGRO: {
-
-	}break;
-	case INCREASE_MP_REPLENISHMENT: {
-
-	}break;
-	case INCREASE_ATTACK_SPEED: {
-
-	}break;
-	case REOVERS_HP_EVERY_5_SECONDS: {
-
-	}break;
-	case REOVERS_MP_EVERY_5_SECONDS: {
-
-	}break;
-	case INCREASE_GATHERING_SKILL: {
-
-	}break;
-	case INCREASE_PLANT_HARVEST_SPEED: {
-
-	}break;
-	case INCREASE_GATHERING_SPEED_ARUN: {
-
-	}break;
-	case INCREASE_ATTACK_SPEED_DECREASE_SKILL_COOLDOWN: {
-
-	}break;
-	case INCREASE_KNOCKDOWN_RESISTANCE_WHILE_SKILL: {
-
-	}break;
-	case REFLECT_DAMAGE_TO_ATTACKER: {
-
-	}break;
-	case INCREASE_CRAFTING_SPEED: {
-
-	}break;
-	case CHANCE_REPLENISH_MP_COMBAT_ENTER: {
-
-	}break;
-	case DECREASE_DURATION_OF_STUN: {
-
-	}break;
-	case INCREASE_PVP_DAMAGE: {
-
-	}break;
-	case DECREASE_PVP_DAMAGE: {
-
-	}break;
-	case DECREASE_DAMAGE_TAKEN: {
-
-	}break;
-
-	default: {
-
-	}break;
-	}
 
 	return;
 }
 
-void WINAPI player_apply_passivitie(p_ptr p, const passivity_template *t)
-{
-
-	return;
-}
 
 e_player_class WINAPI player_get_class(uint32 model)
 {

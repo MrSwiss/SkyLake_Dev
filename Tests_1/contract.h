@@ -17,7 +17,7 @@ struct contract
 	
 	virtual void cancel();
 protected:
-	virtual bool internalInit() = 0;
+	virtual bool internal_init() = 0;
 
 	contract_manager*		root;
 	const e_contract_type	type;

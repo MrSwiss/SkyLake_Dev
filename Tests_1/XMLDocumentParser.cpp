@@ -2553,7 +2553,8 @@ void XMLDocumentParser::InitItemsDictionary()
 	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_STYLE_ACCESSORY", e_item_type::EQUIP_STYLE_ACCESSORY));
 	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_STYLE_WEAPON", e_item_type::EQUIP_STYLE_WEAPON));
 	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_STYLE_BACK", e_item_type::EQUIP_STYLE_BACK));
-	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_STYLE_BODY", e_item_type::EQUIP_STYLE_BODY));
+	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_STYLE_BODY", e_item_type::EQUIP_STYLE_BODY)); 
+	itemTypeDictionary.insert(std::pair<std::string, e_item_type>("EQUIP_UNDERWEAR", e_item_type::EQUIP_UNDERWEAR));
 	//todo add ItemType to dictionary
 
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("comabt", combat));
@@ -2565,6 +2566,9 @@ void XMLDocumentParser::InitItemsDictionary()
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("earring", earring));
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("necklace", necklace));
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("ring", ring));
+	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("belt", belt));
+	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("brooch", brooch));
+	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("underwear", underwear));
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("skillbook", skillbook));
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("token", token));
 	itemCategoryDictionary.insert(std::pair<std::string, e_item_category>("order", order));
@@ -2654,7 +2658,7 @@ void XMLDocumentParser::InitItemsDictionary()
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ARCHER", ARCHER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("PRIEST", PRIEST));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("MYSTIC", MYSTIC));
-	playerClassDictionary.insert(std::pair<std::string, e_player_class>("REAPER", REAPER));
+	playerClassDictionary.insert(std::pair<std::string, e_player_class>("SOULLESS", REAPER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ENGINEER", ENGINEER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("FIGHTER", FIGHTER));
 	playerClassDictionary.insert(std::pair<std::string, e_player_class>("ASSASSIN", ASSASSIN));

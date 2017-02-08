@@ -25,7 +25,7 @@ void bind_contract::begin(uint32 unk)
 	//todo ?
 }
 
-bool bind_contract::internalInit()
+bool bind_contract::internal_init()
 {
 	if (a_load(owner->status) > 0)
 	{

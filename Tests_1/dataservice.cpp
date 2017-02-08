@@ -527,8 +527,8 @@ bool data_service::data_load_items()
 		itemCountNow = (uint32)_items.size();
 	}
 
-	if (!XMLDocumentParser::ParseItemsXMLDocument(".//data//Items//ItemData-test.xml", _items))
-		return false;
+	//if (!XMLDocumentParser::ParseItemsXMLDocument(".//data//Items//ItemData-test.xml", _items))
+	//	return false;
 
 	return true;
 }

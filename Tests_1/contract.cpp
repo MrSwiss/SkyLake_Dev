@@ -27,7 +27,7 @@ bool contract::init(p_ptr p, contract_manager * r, Stream & d)
 	if (!connection_send(owner->con, &d_0))
 		return false;
 
-	if (internalInit()) return true;
+	if (internal_init()) return true;
 
 	root->end_contract(id);
 

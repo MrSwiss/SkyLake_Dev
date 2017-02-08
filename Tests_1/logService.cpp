@@ -1,6 +1,8 @@
 #include "logService.h"
 
 #include <varargs.h>
+#include <iomanip>
+#include <sstream>
 
 void LOG(STRING format, ...)
 {

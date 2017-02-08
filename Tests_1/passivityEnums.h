@@ -4,12 +4,10 @@
 #include "typeDefs.h"
 
 
-enum e_passivity_type :int32
+enum e_passivity_type :uint32
 {
 	INCREASE_MAX_HP = 1,
 	INCREASE_MAX_MP = 2,
-	DISSIPATE_EFFECT_ETCHING =-1000,
-	DISABLE = -1001,//2 unk
 	INCREASE_POWER = 3,
 	INCREASE_ENDURANCE = 4,
 	INCREASE_MOVEMENT_SPEED = 5,
@@ -41,8 +39,13 @@ enum e_passivity_type :int32
 	INCREASE_PVP_DAMAGE = 176,
 	DECREASE_PVP_DAMAGE = 113,
 	DECREASE_DAMAGE_TAKEN = 102,
+
+
+	DISSIPATE_EFFECT_ETCHING = 1000,
+	DISABLE = 1001,//2 unk
 	//MORE TODO
 
+	P_TYPE_MAX
 };
 
 

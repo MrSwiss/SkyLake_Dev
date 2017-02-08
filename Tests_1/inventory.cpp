@@ -3,6 +3,7 @@
 #include "passivitytemplate.h"
 #include "dataservice.h"
 #include "equipmentdatatemplate.h"
+#include "enchantdatatemplate.h"
 #include "player.h"
 #include "Stream.h"
 #include "connexion.h"
@@ -11,9 +12,9 @@
 #include "chat.h"
 #include "config.h"
 #include "entity_manager.h"
+#include "p_processor.h"
 
 #include <fstream>
-#include "enchantdatatemplate.h"
 
 inventory::inventory() : parent(nullptr)
 {
@@ -28,7 +29,7 @@ inventory::~inventory()
 {
 	DeleteCriticalSection(&inv_lock);
 
-	for (uint16 i = 0; i < 20; i++)
+	for (uint16 i = 0; i < PROFILE_MAX; i++)
 	{
 		slot_wipe(profile_slots[i]);
 	}
@@ -70,6 +71,40 @@ bool inventory::insert_or_stack_item(item_id id, uint32 stack_count)
 	return result;
 }
 
+bool inventory::insert_or_stack_item(std::shared_ptr<item> it)
+{
+	uint32 residual = it->stackCount; bool result = false;
+	EnterCriticalSection(&inv_lock);
+
+	for (size_t i = 0; i < slot_count; i++)
+		if (!inventory_slots[i].isEmpty && inventory_slots[i]._item &&
+			inventory_slots[i]._item->item_t->id == it->item_t->id)
+			if (!(residual = item_stack(inventory_slots[i]._item, it->stackCount, STACK_FRAGMENT)))
+			{
+				entity_manager::destroy_item(it->eid); //we stacked the item
+				result = true;
+				break;
+			}
+
+
+	if (residual) {
+		it->stackCount = residual;
+		for (size_t i = 0; i < slot_count; i++)
+			if (inventory_slots[i].isEmpty)
+			{
+				inventory_slots[i]._item = std::move(it); //we added item into inventory
+				inventory_slots[i].isEmpty = 0x01;
+				result = true;
+				break;
+			}
+	}
+	if (result)
+		recalculate_levels();
+
+	LeaveCriticalSection(&inv_lock);
+	return result;
+}
+
 uint32 inventory::pull_item_stack(item_id id, uint32 stack_count)
 {
 	EnterCriticalSection(&inv_lock);
@@ -96,7 +131,7 @@ uint32 inventory::pull_item_stack(item_id id, uint32 stack_count)
 
 bool inventory::equipe_item(slot_id s_id)
 {
-	if (s_id < 20) {
+	if (s_id < PROFILE_MAX) {
 		chat_send_simple_system_message("Cant equipe already equiped items!", parent);
 		return false;
 	}
@@ -108,8 +143,7 @@ bool inventory::equipe_item(slot_id s_id)
 
 	if (!s_r.isEmpty)
 	{
-		if (i_t->requiredLevel > parent->level)
-		{
+		if (i_t->requiredLevel > parent->level) {
 			message_system_send_simple("@347", parent);
 			return false;
 		}
@@ -118,8 +152,7 @@ bool inventory::equipe_item(slot_id s_id)
 		{
 			bool can = false;
 			for (size_t i = 0; i < i_t->requiredClasses.size(); i++)
-				if (i_t->requiredClasses[i] == player_get_class(parent->model))
-				{
+				if (i_t->requiredClasses[i] == player_get_class(parent->model)) {
 					can = true;
 					break;
 				}
@@ -130,13 +163,11 @@ bool inventory::equipe_item(slot_id s_id)
 			}
 		}
 
-		if (s_r._item->isBinded && s_r._item->binderDBId != parent->dbid)
-		{
+		if (s_r._item->isBinded && s_r._item->binderDBId != parent->dbid) {
 			message_system_send_simple("@347", parent); //not binded to you [bind is done on db-id]
 			return false;
 		}
-		else if (!s_r._item->isBinded && i_t->bind_type == BIND_ON_EQUIPE)
-		{
+		else if (!s_r._item->isBinded && i_t->bind_type == BIND_ON_EQUIPE) {
 			s_r._item->isBinded = 0x01;
 			s_r._item->binderDBId = parent->dbid;
 #ifdef _DEBUG
@@ -144,7 +175,7 @@ bool inventory::equipe_item(slot_id s_id)
 #endif
 
 		}
-	
+
 
 		EnterCriticalSection(&inv_lock);
 		e_item_category i_c = i_t->category;
@@ -168,7 +199,14 @@ bool inventory::equipe_item(slot_id s_id)
 				}
 				else
 				{
-					inventory_interchange_items((*this)[PROFILE_EARRING_L], s_r);
+					if ((*this)[PROFILE_RING_R]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_EARRING_L], s_r);
+					}
+					else if ((*this)[PROFILE_EARRING_L]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_EARRING_R], s_r);
+					}
+					else
+						inventory_interchange_items((*this)[PROFILE_EARRING_R], s_r);
 				}
 			}
 			else if (i_c == ring)
@@ -183,7 +221,14 @@ bool inventory::equipe_item(slot_id s_id)
 				}
 				else
 				{
-					inventory_interchange_items((*this)[PROFILE_RING_L], s_r);
+					if ((*this)[PROFILE_RING_R]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_RING_L], s_r);
+					}
+					else if ((*this)[PROFILE_RING_L]._item->item_t->id == s_r._item->item_t->id) {
+						inventory_interchange_items((*this)[PROFILE_RING_R], s_r);
+					}
+					else
+						inventory_interchange_items((*this)[PROFILE_RING_R], s_r);
 				}
 			}
 			else if (i_c == brooch)
@@ -223,32 +268,20 @@ bool inventory::equipe_item(slot_id s_id)
 		case EQUIP_STYLE_BACK:
 			inventory_interchange_items((*this)[PROFILE_SKIN_BACK], s_r);
 			break;
-
+		case EQUIP_UNDERWEAR:
+			inventory_interchange_items((*this)[PROFILE_INNERWARE], s_r);
+			break;
 		default:
 			LeaveCriticalSection(&inv_lock);
 			return false;
 			break;
 		}
 
-
-		player_send_external_change(parent, 1);
-
-		parent->stats.clear_bonus();
-		std::vector<const passivity_template*> passivities;
-		get_profile_passivities(passivities);
-		parent->lock_stats();
-		for (size_t i = 0; i < passivities.size(); i++) {
-			player_process_passivitie(parent, passivities[i]);
-		}
-		parent->unlock_stats();
-
 		LeaveCriticalSection(&inv_lock);
 
-		refresh_enchat_effect();
-		refresh_items_modifiers();
-		
+		player_send_external_change(parent, 1);
+		player_recalculate_inventory_stats(parent);
 		player_send_stats(parent);
-
 		send();
 		return true;
 	}
@@ -270,26 +303,11 @@ bool inventory::unequipe_item(slot_id s_id)
 	profile_slots[s_id - 1]._item->binderDBId = 0;
 
 	inventory_interchange_items(profile_slots[s_id - 1], inventory_slots[i]);
-
-	player_send_external_change(parent, 1);
-	
-	
-	std::vector<const passivity_template*> passivities;
-	get_profile_passivities(passivities);
-	parent->lock_stats();
-	parent->stats.clear_bonus();
-	for (size_t i = 0; i < passivities.size(); i++) {
-		player_process_passivitie(parent, passivities[i]);
-	}
-	parent->unlock_stats();
-
 	LeaveCriticalSection(&inv_lock);
 
-	refresh_enchat_effect();
-	refresh_items_modifiers();
-
+	player_send_external_change(parent, 1);
+	player_recalculate_inventory_stats(parent);
 	player_send_stats(parent);
-
 	send();
 	return true;
 }
@@ -325,7 +343,7 @@ void inventory::send(byte show)
 	data->WriteInt32(0);
 
 	uint16 next; uint16 count = 0; bool i_t = false; uint16 t_count = 0;
-	for (size_t i = 0; i < 20; i++)
+	for (size_t i = 0; i < PROFILE_MAX; i++)
 	{
 		if (!profile_slots[i].isEmpty)
 		{
@@ -416,7 +434,7 @@ void WINAPI inventory_write_item(inventory_slot * slot, uint32 db_id, Stream * d
 	data->WriteFloat(0);
 	data->WriteInt32(slot->_item->binderDBId); //binder  ?
 	data->WriteInt32(0); //disabled  ?
-	data->WriteUInt8(slot->_item->isAwakened);
+	data->WriteUInt8(slot->_item->isAwakened); // slot->_item->isAwakened
 	data->WriteInt32(0); //unk
 
 	data->WriteInt32(0);
@@ -550,7 +568,7 @@ std::shared_ptr<item> inventory::get_item(entityId id)
 inventory_slot& inventory::operator[](slot_id id)
 {
 	EnterCriticalSection(&inv_lock);
-	if ((id) >= 0 && (id ) <= 20)
+	if ((id) >= 0 && (id) <= PROFILE_MAX)
 	{
 		LeaveCriticalSection(&inv_lock);
 		return profile_slots[(id)];
@@ -568,7 +586,7 @@ void inventory::clear()
 		slot_wipe(inventory_slots[i]);
 	}
 
-	for (size_t i = 0; i < 20; i++)
+	for (size_t i = 0; i < PROFILE_MAX; i++)
 	{
 		slot_wipe(profile_slots[i]);
 	}
@@ -619,14 +637,14 @@ slot_id inventory::get_profile_item_slot_id_by_eid(item_eid eid)
 
 uint8 inventory::get_profile_item_enchant_level(slot_id id)
 {
-	return (((id) >= 0) && ((id ) < 20)) ? (profile_slots[id]._item ? profile_slots[id ]._item->enchantLevel : 0x00) : 0x00;
+	return (((id) >= 0) && ((id) < PROFILE_MAX)) ? (profile_slots[id]._item ? profile_slots[id]._item->enchantLevel : 0x00) : 0x00;
 }
 
 void inventory::get_profile_passivities(std::vector<const passivity_template*>& out)
 {
 	EnterCriticalSection(&inv_lock);
 
-	for (uint32 i = 0; i < 14; i++)
+	for (uint32 i = 0; i < PROFILE_MAX; i++)
 		if (!profile_slots[i].isEmpty)
 			iventory_get_item_passivities(profile_slots[i]._item, out);
 
@@ -647,14 +665,14 @@ void inventory::refresh_enchat_effect()
 				profile_slots[i]._item->item_t->equipmentData) {
 				for (size_t j = 0; j < profile_slots[i]._item->item_t->enchant->stats.size(); j++)
 				{
-					if (profile_slots[i]._item->item_t->enchant->stats[i].enchantStep > 12)
+					if (profile_slots[i]._item->item_t->enchant->stats[j].enchantStep > 12)
 					{
-						if (profile_slots[i]._item->item_t->enchant->stats[i].enchantStep > profile_slots[i]._item->enchantLevel)
+						if (profile_slots[i]._item->item_t->enchant->stats[j].enchantStep > profile_slots[i]._item->enchantLevel)
 							break;
 
-						mod = (profile_slots[i]._item->item_t->enchant->stats[i].rate - ((int)profile_slots[i]._item->item_t->enchant->stats[i].rate));
+						mod = (profile_slots[i]._item->item_t->enchant->stats[j].rate - ((int)profile_slots[i]._item->item_t->enchant->stats[j].rate));
 
-						switch (profile_slots[i]._item->item_t->enchant->stats[i].kind)
+						switch (profile_slots[i]._item->item_t->enchant->stats[j].kind)
 						{
 						case attack:
 							parent->stats.enchant_attack += (uint32)(profile_slots[i]._item->item_t->equipmentData->maxAttack * mod);
@@ -673,10 +691,10 @@ void inventory::refresh_enchat_effect()
 					}
 					else
 					{
-						mod = profile_slots[i]._item->enchantLevel * (profile_slots[i]._item->item_t->enchant->stats[i].rate -
-							((int)profile_slots[i]._item->item_t->enchant->stats[i].rate)); //get only fractional part
+						mod = profile_slots[i]._item->enchantLevel * (profile_slots[i]._item->item_t->enchant->stats[j].rate -
+							((int)profile_slots[i]._item->item_t->enchant->stats[j].rate)); //get only fractional part
 
-						switch (profile_slots[i]._item->item_t->enchant->stats[i].kind)
+						switch (profile_slots[i]._item->item_t->enchant->stats[j].kind)
 						{
 						case attack:
 							parent->stats.enchant_attack += (uint32)(profile_slots[i]._item->item_t->equipmentData->maxAttack * mod);
@@ -757,7 +775,7 @@ bool inventory::move_item(uint32 i_0, uint32 i_1)
 
 item_id inventory::get_profile_item(slot_id id)
 {
-	return (((id) >= 0) && ((id) < 20)) ? (profile_slots[id]._item ? profile_slots[id]._item->item_t->id : 0x00) : 0x00;
+	return (((id) >= 0) && ((id) < PROFILE_MAX)) ? (profile_slots[id]._item ? profile_slots[id]._item->item_t->id : 0x00) : 0x00;
 }
 
 
@@ -771,7 +789,7 @@ Stream * inventory::get_raw()
 
 	uint16 count = 0;
 	out->WritePos(0);
-	for (uint32 i = 0; i < 20; i++)
+	for (uint32 i = 0; i < PROFILE_MAX; i++)
 	{
 		if (!profile_slots[i].isEmpty)
 		{
@@ -917,8 +935,7 @@ uint32 WINAPI item_stack(std::shared_ptr<item> i, uint32 stack_count, byte mode)
 	return out;
 }
 
-bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count)
-{
+bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count){
 	if (!j.isEmpty)
 		return false;
 
@@ -932,8 +949,7 @@ bool WINAPI slot_insert(inventory_slot & j, item_id id, uint32 stack_count)
 	return false;
 }
 
-void WINAPI slot_wipe(inventory_slot &s)
-{
+void WINAPI slot_wipe(inventory_slot &s){
 	if (!s.isEmpty) {
 		entity_manager::destroy_item(s._item->eid);
 		s._item = nullptr;
@@ -1000,13 +1016,8 @@ bool WINAPI inventory_build_item(inventory_slot& slot, item_id id)
 	slot.isEmpty = 0;
 
 	const item_template * t = slot._item->item_t;
-	if (t->equipmentData && t->equipmentData->passivityG)
-		slot._item->passivities.push_back(t->equipmentData->passivityG);
-
-	if (t->enchantEnable && t->enchant)
-	{
-		//EquipmentService::RollEnchantPassivities(item->_enchant, slot->_info->_passivities); //todo
-	}
+	
+	passivity_roll_item(slot._item);
 
 	return true;
 }
@@ -1018,7 +1029,7 @@ bool WINAPI inventory_new(std::shared_ptr<player> p)
 	inventory * inv = &p->i_;
 
 
-	if (pClass == WARRIOR || pClass == ARCHER || pClass == SLAYER || pClass == REAPER)
+	if (pClass == WARRIOR || pClass == ARCHER || pClass == SLAYER /*|| pClass == REAPER*/)
 	{
 		inventory_build_item((*inv)[PROFILE_ARMOR], 15004);
 		inventory_build_item((*inv)[PROFILE_GLOVES], 15005);
@@ -1120,7 +1131,7 @@ void iventory_get_item_passivities(std::shared_ptr<item> it, std::vector<const p
 
 void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2)
 {
-	
+
 	if (!s1.isEmpty) {
 		s1._item->isBinded = 0x00;
 		s1._item->binderDBId = 0;
