@@ -200,6 +200,13 @@ struct p_stats
 	bool has_special() const;
 };
 
+struct p_skills
+{
+	std::vector<uint32> active;
+	std::vector<uint32> passive;
+	std::vector<uint32> get_skills() const;
+};
+
 
 struct s_stats
 {
@@ -242,6 +249,12 @@ struct s_stats
 			stun_resist;
 	};
 
+	struct skill
+	{
+		std::vector<uint32> active;
+		std::vector<uint32> passive;
+	};
+
 	struct c_progress
 	{
 		uint32 level;
@@ -256,6 +269,8 @@ struct s_stats
 
 	stats class_base_stats[13];
 	stats race_base_stats[8];
+	skill class_base_skills[13];
+	skill race_base_skills[8];
 
 	std::vector<r_progress> race_progress;
 	std::vector<c_progress> class_progress;
@@ -266,7 +281,9 @@ void WINAPI s_stats_get_progress(p_ptr);
 void WINAPI s_stats_get_base_stats(p_ptr);
 void WINAPI s_stats_init_player(p_ptr);
 void WINAPI s_stats_process_progress(p_ptr, uint16);
+void WINAPI s_skills_get_base_skills(p_ptr);
 static void WINAPI s_stats_add_to_base(s_stats::stats&from, p_stats& to);
+static void WINAPI s_skills_add_to_base(s_stats::skill&from, p_skills& to);
 
 bool WINAPI s_stats_load_scripts();
 #endif

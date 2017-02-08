@@ -7,8 +7,8 @@ mp=500
 
 
 attackSpeed=210
-movementSpeed=140
-runSpeed=310
+movementSpeed=210
+runSpeed=300
 
 fiveHpRegen=100
 threeHpRegen=0
@@ -40,7 +40,41 @@ specialRegenRate=5
 
 .lancer:1
 {
+hp=2191
+mp=1300
 
+
+attackSpeed=100
+movementSpeed=105
+runSpeed=300
+
+fiveHpRegen=100
+threeHpRegen=0
+
+fiveMpRegen=50
+threeMpRegen=0
+
+critRate=50
+critResist=75
+critPower=2.0
+
+stunRate=0.0
+poisonRate=0.0
+weakeningRate=1.0
+
+weakeningResist=45
+poisonResist=45
+stunResist=45
+
+gatherSpeed=100
+mineSpeed=100
+harvestSpeed=100
+craftSpeed=100
+
+special=5000
+specialRegen=1050
+specialRegenRate=5
+skills=10100,20100,260100,111135
 }
 
 .slayer:2
@@ -82,13 +116,6 @@ specialRegenRate=3
 
 .reaper:8
 {
-attackSpeed=240
-movementSpeed=180
-runSpeed=210
-hp=50000
-mp=10000
-fiveHpRegen=500
-fiveMpRegen=100
 
 }
 
@@ -139,12 +166,12 @@ threeHpRegen=500
 fiveMpRegen=550
 
 attackSpeed=180
-movementSpeed=180
-runSpeed=210
+movementSpeed=240
+runSpeed=310
 
 special=5500
 specialRegen=250
-specialRegenRate=1
+specialRegenRate=5
 }
 
 .general:12

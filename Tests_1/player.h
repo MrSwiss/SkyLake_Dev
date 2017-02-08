@@ -33,6 +33,7 @@ public:
 	std::atomic_uint8_t				p_c_c_id;	//player current contientn id
 	std::atomic_uint8_t				channel;
 	p_stats							stats;
+	p_skills						skills;
 	inventory						i_;
 
 	std::atomic_uint8_t				status;

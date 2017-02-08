@@ -178,6 +178,15 @@ bool p_stats::has_special() const {
 	return get_special() > 0 ? true : false;
 }
 
+std::vector<uint32> p_skills::get_skills() const
+{
+	std::vector<uint32> skills;
+	skills.insert(skills.begin(), active.begin(), active.end());
+	skills.insert(skills.begin(), passive.begin(), passive.end());
+	return skills;
+}
+
+
 
 
 
@@ -201,6 +210,39 @@ char* WINAPI get_line(char* file, std::string& line)
 	if (file[0] == EOF) return NULL;
 
 	return file;
+}
+
+char* WINAPI parse_skills(char* file, s_stats::skill& skills)
+{
+	std::string line;
+	char* currsor = get_line(file, line);
+	while (currsor)
+	{
+		if (line[0] == '}')
+		{
+			break;
+		}
+
+		if (stringStartsWith(line, "active"))
+		{
+			std::vector<int> skillsList = string_split_skill(string_split_get_right(line, '='), ',');
+			for (int i = 0; i < skillsList.size(); i++)
+			{
+				skills.active.push_back(skillsList[i]);
+			}
+		}
+		else if (stringStartsWith(line, "passive"))
+		{
+			std::vector<int> skillsList = string_split_skill(string_split_get_right(line, '='), ',');
+			for (int i = 0; i < skillsList.size(); i++)
+			{
+				skills.passive.push_back(skillsList[i]);
+			}
+		}
+		line.clear();
+		currsor = get_line(currsor, line);
+	}
+	return currsor;
 }
 
 char* WINAPI parse_stats(char* file, s_stats::stats& stats) {
@@ -382,6 +424,58 @@ bool WINAPI s_stats_parse_class_base_stats_file(char* file) {
 	return true;
 }
 
+bool WINAPI s_skills_parse_class_base_skills_file(char* file) {
+	std::string line;
+	char* currsor = file;
+	while (currsor)
+	{
+		line.clear();
+		currsor = get_line(currsor, line);
+		if (
+			line.size() >= 0 &&
+			line[0] != '#' &&
+			line[0] != '{' &&
+			line[0] != '\n')
+		{
+			if (stringStartsWith(line, "."))
+			{
+				uint32 id = atoi(string_split_get_right(line, ':').c_str());
+				currsor = parse_skills(currsor, skylake_stats.class_base_skills[id]);
+			}
+		}
+
+
+	}
+
+	return true;
+}
+
+bool WINAPI s_skills_parse_race_base_skills_file(char* file)
+{
+	std::string line;
+	char* currsor = file;
+	while (currsor)
+	{
+		line.clear();
+		currsor = get_line(currsor, line);
+		if (
+			line.size() >= 0 &&
+			line[0] != '#' &&
+			line[0] != '{' &&
+			line[0] != '\n')
+		{
+			if (stringStartsWith(line, "."))
+			{
+				uint32 id = atoi(string_split_get_right(line, ':').c_str());
+				currsor = parse_skills(currsor, skylake_stats.race_base_skills[id]);
+			}
+		}
+
+
+	}
+	return true;
+}
+
 bool WINAPI s_stats_parse_race_base_stats_file(char* file) {
 	std::string line;
 	char* currsor = file;
@@ -527,6 +621,8 @@ bool WINAPI s_stats_load_scripts()
 	char* race_base_stats_file = nullptr;
 	char* class_progress_file = nullptr;
 	char* race_progress_file = nullptr;
+	char *class_base_skills_file = nullptr;
+	char* race_base_skills_file = nullptr;
 
 	uint32 size = 0;
 
@@ -599,6 +695,38 @@ bool WINAPI s_stats_load_scripts()
 	file.read(race_progress_file, size);
 	file.close();
 	//-----------------------------------------------
+
+	dir = config::dir.dataScripts;
+	dir += "//class_base_skills.skylake";
+	file.open(dir.c_str());
+	if (!file.is_open()) {
+		error_msg = "could not find 'class_base_skills.skylake' in ";
+		error_msg += config::dir.dataScripts;
+		goto error_proc;
+	}
+	file.seekg(0, std::ifstream::end);
+	class_base_skills_file = new char[(size = (int)file.tellg()) + 1];
+	class_base_skills_file[size] = 0xff;
+	file.seekg(0, std::ifstream::beg);
+	file.read(class_base_skills_file, size);
+	file.close();
+	//-----------------------------------------------
+
+	dir = config::dir.dataScripts;
+	dir += "//race_base_skills.skylake";
+	file.open(dir.c_str());
+	if (!file.is_open()) {
+		error_msg = "could not find 'race_base_skills.skylake' in ";
+		error_msg += config::dir.dataScripts;
+		goto error_proc;
+	}
+	file.seekg(0, std::ifstream::end);
+	race_base_skills_file = new char[(size = (int)file.tellg()) + 1];
+	race_base_skills_file[size] = 0xff;
+	file.seekg(0, std::ifstream::beg);
+	file.read(race_base_skills_file, size);
+	file.close();
+	//-----------------------------------------------
 #pragma endregion
 
 	if (!s_stats_parse_class_base_stats_file(class_base_stats_file)) {
@@ -618,6 +746,18 @@ bool WINAPI s_stats_load_scripts()
 
 	if (!s_stats_parse_race_progress_file(race_progress_file)) {
 		error_msg = "FAILED_TO_PARSE progress_race.skylake";
+		goto error_proc;
+	}
+
+	if (!s_skills_parse_class_base_skills_file(class_base_skills_file))
+	{
+		error_msg = "FAILED_TO_PARSE class_base_skills.skylake";
+		goto error_proc;
+	}
+
+	if (!s_skills_parse_race_base_skills_file(race_base_skills_file))
+	{
+		error_msg = "FAILED_TO_PARSE race_base_skills.skylake";
 		goto error_proc;
 	}
 
@@ -642,6 +782,18 @@ bool WINAPI s_stats_load_scripts()
 	if (race_progress_file) {
 		delete[]race_progress_file;
 		race_progress_file = 0;
+	}
+
+	if (class_base_skills_file)
+	{
+		delete[]class_base_skills_file;
+		class_base_skills_file = 0;
+	}
+
+	if (race_base_skills_file)
+	{
+		delete[]race_base_skills_file;
+		class_base_skills_file = 0;
 	}
 
 
@@ -667,6 +819,18 @@ error_proc:
 	if (race_progress_file) {
 		delete[]race_progress_file;
 		race_progress_file = 0;
+	}
+
+	if (class_base_skills_file)
+	{
+		delete[]class_base_skills_file;
+		class_base_skills_file = 0;
+	}
+
+	if (race_base_skills_file)
+	{
+		delete[]race_base_skills_file;
+		class_base_skills_file = 0;
 	}
 
 	printf("::ERROR_ON_LOADING_SCRIPTS. [%s]\n", error_msg.c_str());
@@ -713,12 +877,22 @@ void WINAPI s_stats_init_player(p_ptr p) {
 
 	s_stats_get_base_stats(p);
 	s_stats_get_progress(p);
+	s_skills_get_base_skills(p);
 
 	p->i_.refresh_enchat_effect();
 	p->i_.refresh_items_modifiers();
 
 	//load active effects
 	return;
+}
+
+void WINAPI s_skills_get_base_skills(p_ptr p)
+{
+	s_skills_add_to_base(skylake_stats.class_base_skills[p->pClass], p->skills);
+	s_skills_add_to_base(skylake_stats.race_base_skills[p->pRace], p->skills);
+
+	s_skills_add_to_base(skylake_stats.class_base_skills[CLASS_MAX], p->skills);
+	s_skills_add_to_base(skylake_stats.race_base_skills[RACE_MAX], p->skills);
 }
 
 void WINAPI s_stats_process_progress(p_ptr p, uint16 new_level)
@@ -819,4 +993,10 @@ void WINAPI s_stats_add_to_base(s_stats::stats &from, p_stats &to) {
 	*/
 
 	return;
+}
+
+void WINAPI s_skills_add_to_base(s_stats::skill &from, p_skills &to)
+{
+	to.active.insert(to.active.end(), from.active.begin(), from.active.end());
+	to.passive.insert(to.passive.end(), from.passive.begin(), from.passive.end());
 }

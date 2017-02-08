@@ -1,5 +1,5 @@
 #include "stringUtils.h"
-
+#include <sstream>
 
 
 bool stringStartsWith(std::string a, std::string with, bool ignoreWhiteSpaces)
@@ -43,4 +43,17 @@ std::string string_split_get_right(std::string line, char c)
 	}
 
 	return std::move(out);
+}
+
+std::vector<int> string_split_skill(std::string skills, char c)
+{
+	std::vector<int> skillsList;
+	std::stringstream ss;
+	ss.str(skills);
+	std::string skill;
+	while (std::getline(ss, skill, ',')) {
+		skillsList.push_back(atoi(skill.c_str()));
+	}
+
+	return skillsList;
 }

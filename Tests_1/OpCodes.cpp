@@ -1164,10 +1164,33 @@ bool WINAPI op_select_player(std::shared_ptr<connection> c, void* argv[])
 
 	p->i_.send();
 
+	int last = 8;
 	data->Clear();
-	data->Resize(8);
-	data->WriteInt16(8);
+	data->Resize(15);
+	data->WriteInt16(0);
 	data->WriteInt16(S_SKILL_LIST);
+	data->WriteInt16(p->skills.active.size() + p->skills.passive.size());
+	data->WriteInt16(8);
+	for (int i = 0; i < p->skills.active.size(); i++)
+	{
+		data->WritePos(last);
+		data->WriteInt16(data->_pos);
+		last = data->_pos;
+		data->WriteInt16(0);
+		data->WriteInt32(p->skills.active[i]);
+		data->WriteUInt8(1);//active
+	}
+	for(int i =0; i < p->skills.passive.size(); i++)
+	{
+		data->WritePos(last);
+		data->WriteInt16(data->_pos);
+		last = data->_pos;
+		data->WriteInt16(0);
+		data->WriteInt32(p->skills.passive[i]);
+		data->WriteUInt8(0);//passive
+
+	}
+	data->WritePos(0);
 	if (!connection_send(c))
 		return false;
 
