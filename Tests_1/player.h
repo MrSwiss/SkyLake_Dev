@@ -13,6 +13,7 @@
 
 #include "MySqlDriver.h"
 #include "win32.h"
+#include "party.h"
 
 
 class connection;
@@ -58,6 +59,7 @@ public:
 	void							update(double dt, double elapse);
 	void							lock_stats();
 	void							unlock_stats();
+	void							save();
 
 	player(entityId, uint32 db_id, std::shared_ptr<connection>);
 	~player();

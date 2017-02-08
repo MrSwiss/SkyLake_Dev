@@ -89,6 +89,9 @@ bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection>, void* argv
 bool WINAPI op_check_unidentify_items(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_random_passive_lock(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_unidentify_execute(std::shared_ptr<connection>, void* argv[]);
+
+//guild
+bool WINAPI op_request_guild_info(std::shared_ptr<connection> c, void* argv[]);
 #endif
 
 

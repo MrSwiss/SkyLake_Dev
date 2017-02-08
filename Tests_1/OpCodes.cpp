@@ -99,6 +99,9 @@ bool opcode_init()
 	opcode_add(C_RANDOM_PASSIVE_LOCK, op_random_passive_lock);
 	opcode_add(C_UNIDENTIFY_EXECUTE, op_unidentify_execute);
 
+	//---------------------------------------------------------------Guild
+	opcode_add(C_REQUEST_GUILD_INFO, op_request_guild_info);
+
 
 	return true;
 }
@@ -1633,6 +1636,7 @@ bool WINAPI op_return_to_lobby(std::shared_ptr<connection> c, void* argv[])
 	//todo timed
 	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
 	active_remove_player(c->_players[c->_selected_player]);
+	c->_players[c->_selected_player]->save();
 
 	Sleep(500);
 	Stream data = Stream();
@@ -1653,6 +1657,7 @@ bool WINAPI op_exit(std::shared_ptr<connection> c, void* argv[])
 {
 	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
 	active_remove_player(c->_players[c->_selected_player]);
+	c->_players[c->_selected_player]->save();
 
 	Stream data = Stream();
 	data.Resize(12);
@@ -2356,4 +2361,16 @@ bool WINAPI op_random_passive_lock(std::shared_ptr<connection>, void * argv[])
 bool WINAPI op_unidentify_execute(std::shared_ptr<connection>, void * argv[])
 {
 	return false;
+}
+
+
+//--------------------------------------------------------------Guild
+bool WINAPI op_request_guild_info(std::shared_ptr<connection> c, void* argv[])
+{
+	Stream data = Stream();
+	data.Resize(4);
+	data.WriteInt16(4);
+	data.WriteInt16(S_EMPTY_GUILD_WINDOW);
+
+	return connection_send(c, &data);
 }

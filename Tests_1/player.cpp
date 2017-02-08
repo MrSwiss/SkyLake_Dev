@@ -5,6 +5,8 @@
 #include "itemEnums.h"
 #include "passivitytemplate.h"
 #include "passivityEnums.h"
+#include "servertime.h"
+#include <sstream>
 
 
 void player::update(double dt, double elapsed)
@@ -188,6 +190,47 @@ void player::lock_stats()
 void player::unlock_stats()
 {
 	LeaveCriticalSection(&stats_lock);
+}
+
+void player::save()
+{
+	sql::Connection * sqlCon = mysql_get_driver()->open();
+	if (!sqlCon)
+	{
+		printf("::WORKER_THREAD::SQL CONNECTION BAD!!\n");
+		return;
+	}
+
+	try
+	{
+		sql::PreparedStatement *ps = sqlCon->prepareStatement("UPDATE players SET x=?, y=?, z=?, h=?, exp=?, restedExp=?, areaId=?, level=?, lastOnlineUTC=?, worldMapGuardId=?, worldMapWorldId=?, worldMapSectionId=?, channel=? WHERE name=?");
+		ps->setDouble(1, this->position.x);
+		ps->setDouble(2, this->position.y);
+		ps->setDouble(3, this->position.z);
+		ps->setInt(4, this->position.heading);
+		ps->setInt64(5, this->exp);
+		ps->setInt64(6, this->restedExp);
+		ps->setInt(7, this->position.continent_id);
+		ps->setInt(8, this->level);
+		ps->setInt64(9, timer_get_current_UTC());
+		ps->setInt(10, this->position.worldMapGuardId);
+		ps->setInt(11, this->position.worldMapWorldId);
+		ps->setInt(12, this->position.worldMapSectionId);
+		ps->setInt(13, this->position.channel);
+		ps->setString(14, this->name);
+		ps->execute();
+
+		ps = sqlCon->prepareStatement("UPDATE player_inventory SET items=?, slotCount=?, gold=? WHERE name=?");
+		std::istringstream invBlob = std::istringstream(std::string((const char*)this->i_.get_raw()->_raw, this->i_.get_raw()->_size));
+		ps->setBlob(1, &invBlob);
+		ps->setInt(2, this->i_.slot_count);
+		ps->setInt64(3, this->i_.gold);
+		ps->setString(4, this->name);
+	}
+	catch(sql::SQLException &e)
+	{
+		printf("SQL-ERROR-[%s] FUNC[%s]\n", e.what(), __FUNCTION__);
+	}
 }
 
 
