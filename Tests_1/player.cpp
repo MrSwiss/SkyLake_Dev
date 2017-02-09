@@ -193,14 +193,8 @@ void player::unlock_stats()
 	LeaveCriticalSection(&stats_lock);
 }
 
-void player::save()
+void player::save(sql::Connection * sqlCon)
 {
-	sql::Connection * sqlCon = mysql_get_driver()->open();
-	if (!sqlCon)
-	{
-		printf("::WORKER_THREAD::SQL CONNECTION BAD!!\n");
-		return;
-	}
 
 	try
 	{
@@ -227,6 +221,7 @@ void player::save()
 		ps->setInt(2, this->i_.slot_count);
 		ps->setInt64(3, this->i_.gold);
 		ps->setString(4, this->name);
+		ps->execute();
 	}
 	catch(sql::SQLException &e)
 	{

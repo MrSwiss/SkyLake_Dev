@@ -59,7 +59,7 @@ public:
 	void							update(double dt, double elapse);
 	void							lock_stats();
 	void							unlock_stats();
-	void							save();
+	void							save(sql::Connection*);
 
 	player(entityId, uint32 db_id, std::shared_ptr<connection>);
 	~player();

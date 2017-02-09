@@ -32,6 +32,7 @@
 #include "skylake_stats.h"
 #include "bind_contract.h"
 #include "enchant_contract.h"
+#include <cppconn/connection.h>
 
 bool opcode_init()
 {
@@ -1660,7 +1661,7 @@ bool WINAPI op_return_to_lobby(std::shared_ptr<connection> c, void* argv[])
 	//todo timed
 	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
 	active_remove_player(c->_players[c->_selected_player]);
-	c->_players[c->_selected_player]->save();
+	c->_players[c->_selected_player]->save((sql::Connection*)argv[0]);
 
 	Sleep(500);
 	Stream data = Stream();
@@ -1681,7 +1682,7 @@ bool WINAPI op_exit(std::shared_ptr<connection> c, void* argv[])
 {
 	world_server_process_job_async(new j_exit_world(c->_players[c->_selected_player]), J_W_PLAYER_EXIT_WORLD);
 	active_remove_player(c->_players[c->_selected_player]);
-	c->_players[c->_selected_player]->save();
+	c->_players[c->_selected_player]->save((sql::Connection*)argv[0]);
 
 	Stream data = Stream();
 	data.Resize(12);
