@@ -23,6 +23,7 @@ struct enchant_contract : public contract
 
 	void try_enchant();
 	void set_byte(byte type);
+	void cancel_temper();
 
 	void cancel();
 
@@ -32,7 +33,9 @@ struct enchant_contract : public contract
 	std::shared_ptr<item> i_;
 
 private:
-	byte type;
+	bool enchant_write_materials();
+
+	byte type_unk;
 	std::unique_ptr<enchant_action> action;
 };
 

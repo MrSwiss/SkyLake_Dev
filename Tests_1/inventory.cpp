@@ -77,8 +77,7 @@ bool inventory::insert_or_stack_item(std::shared_ptr<item> it)
 	EnterCriticalSection(&inv_lock);
 
 	for (size_t i = 0; i < slot_count; i++)
-		if (!inventory_slots[i].isEmpty && inventory_slots[i]._item &&
-			inventory_slots[i]._item->item_t->id == it->item_t->id)
+		if (!inventory_slots[i].isEmpty && inventory_slots[i]._item->item_t->id == it->item_t->id)
 			if (!(residual = item_stack(inventory_slots[i]._item, it->stackCount, STACK_FRAGMENT)))
 			{
 				entity_manager::destroy_item(it->eid); //we stacked the item
@@ -93,7 +92,7 @@ bool inventory::insert_or_stack_item(std::shared_ptr<item> it)
 			if (inventory_slots[i].isEmpty)
 			{
 				inventory_slots[i]._item = std::move(it); //we added item into inventory
-				inventory_slots[i].isEmpty = 0x01;
+				inventory_slots[i].isEmpty = 0x00;
 				result = true;
 				break;
 			}
@@ -886,12 +885,6 @@ Stream * inventory::get_raw()
 	out->SetEnd();
 
 	LeaveCriticalSection(&inv_lock);
-
-#ifdef _DEBUG
-	std::ofstream fd = std::ofstream("bump_inventory.bin");
-	fd.write((const char*)out->_raw, out->_size);
-	fd.close();
-#endif
 
 	return out;
 }

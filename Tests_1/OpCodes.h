@@ -84,6 +84,7 @@ bool WINAPI op_cancel_contract(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_bind_item_begin_progress(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_bind_item_execute(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_execute_temper(std::shared_ptr<connection>, void* argv[]);
+bool WINAPI op_cancel_temper(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_play_execute_temper(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection>, void* argv[]);
 bool WINAPI op_check_unidentify_items(std::shared_ptr<connection>, void* argv[]);

@@ -95,6 +95,7 @@ bool opcode_init()
 	opcode_add(C_BIND_ITEM_BEGIN_PROGRESS, op_bind_item_begin_progress);
 	opcode_add(C_BIND_ITEM_EXECUTE, op_bind_item_execute);
 	opcode_add(C_EXECUTE_TEMPER, op_execute_temper);
+	opcode_add(C_CANCEL_TEMPER, op_cancel_temper);
 	opcode_add(C_PLAY_EXECUTE_TEMPER, op_play_execute_temper);
 	opcode_add(C_ADD_TO_TEMPER_MATERIAL_EX, op_add_to_temper_material_ex);
 	opcode_add(C_CHECK_UNIDENTIFY_ITEMS, op_check_unidentify_items);
@@ -1181,7 +1182,7 @@ bool WINAPI op_select_player(std::shared_ptr<connection> c, void* argv[])
 		data->WriteInt32(p->skills.active[i]);
 		data->WriteUInt8(1);//active
 	}
-	for(int i =0; i < p->skills.passive.size(); i++)
+	for (int i = 0; i < p->skills.passive.size(); i++)
 	{
 		data->WritePos(last);
 		data->WriteInt16(data->_pos);
@@ -2112,12 +2113,12 @@ bool WINAPI op_show_item_tooltip_ex(std::shared_ptr<connection> c, void * argv[]
 	data->_pos = name_offset - 4;
 	std::string player_name = std::move(data->ReadUTF16StringBigEdianToASCII());
 	std::shared_ptr<item> i = nullptr;
-	if (type == 20)
-	{
-		i = c->_players[c->_selected_player]->i_.get_item(eid);
-	}
-	else
-		i = entity_manager::get_item(eid);
+	//if (type == 20)
+	//{
+	//	i = c->_players[c->_selected_player]->i_.get_item(eid);
+	//}
+	//else
+	i = entity_manager::get_item(eid);
 
 	if (i) {
 		data->Clear();
@@ -2361,7 +2362,7 @@ bool WINAPI op_request_contract(std::shared_ptr<connection> c, void * argv[])
 bool WINAPI op_cancel_contract(std::shared_ptr<connection> c, void * argv[])
 {
 	e_contract_type c_t = (e_contract_type)c->_recvBuffer.data.ReadUInt32();
-	bind_contract * b_c = (bind_contract*)c->_players[c->_selected_player]->c_manager.get_contract(c_t);
+	contract * b_c = c->_players[c->_selected_player]->c_manager.get_contract(c_t);
 	if (b_c) {
 		b_c->cancel();
 	}
@@ -2406,10 +2407,24 @@ bool WINAPI op_execute_temper(std::shared_ptr<connection> c, void * argv[])
 	return true;
 }
 
-bool WINAPI op_play_execute_temper(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_cancel_temper(std::shared_ptr<connection> c, void * argv[])
 {
-	//TODO send social 11
-	return false;
+	enchant_contract * contract = (enchant_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENCHANT_CONTRACT);
+	if (contract) {
+		contract->cancel_temper();
+	}
+	else
+		if (c->_account.isGm) {
+			chat_send_simple_system_message("ERROR 10006 [op_cancel_temper]", c->_players[c->_selected_player]);
+		}
+
+	return true;
+}
+
+bool WINAPI op_play_execute_temper(std::shared_ptr<connection> c, void * argv[])
+{
+	send_social(12, c->_players[c->_selected_player]);
+	return true;
 }
 
 bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection> c, void * argv[])

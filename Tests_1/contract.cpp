@@ -36,6 +36,7 @@ bool contract::init(p_ptr p, contract_manager * r, Stream & d)
 
 void contract::cancel()
 {
+	send_social_cancel(owner);
 	data.Clear();
 	data.Resize(28);
 	data.WriteInt16(28);

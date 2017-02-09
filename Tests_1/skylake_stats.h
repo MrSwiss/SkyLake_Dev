@@ -277,6 +277,25 @@ struct s_stats
 
 } static skylake_stats;
 
+struct e_stats
+{
+	struct item_e
+	{
+		item_e();
+		uint32 id;
+		uint32 rate;
+	};
+
+	double feedstock_multiplier;
+	uint32 enchant_rates[15];
+	uint32 enchant_pool_range;
+
+	std::vector<item_e> material_rates;
+
+}static skylake_e_stats;
+
+bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 material_item_id,uint32 feed_stock_count);
+
 void WINAPI s_stats_get_progress(p_ptr);
 void WINAPI s_stats_get_base_stats(p_ptr);
 void WINAPI s_stats_init_player(p_ptr);

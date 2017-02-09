@@ -69,14 +69,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\boost;C:\Users\Narcis\Documents\Visual Studio 2015\Projects\Tests_1\Tests_1\mysql\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Narcis\Documents\Visual Studio 2015\Projects\Tests_1\Tests_1\mysql\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\boost;C:\Users\Administrator\Documents\GitHub\SkyLake_Dev\Tests_1\mysql\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Administrator\Documents\GitHub\SkyLake_Dev\Tests_1\mysql\lib;$(LibraryPath)</LibraryPath>
     <TargetName>Sky Lake</TargetName>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\boost;C:\Users\Narcis\Documents\Visual Studio 2015\Projects\Tests_1\Tests_1\mysql\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Narcis\Documents\Visual Studio 2015\Projects\Tests_1\Tests_1\mysql\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\boost;C:\Users\Administrator\Documents\GitHub\SkyLake_Dev\Tests_1\mysql\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Administrator\Documents\GitHub\SkyLake_Dev\Tests_1\mysql\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

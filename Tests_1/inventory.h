@@ -23,8 +23,9 @@ struct item : public entity
 {
 	item(entityId);
 
+	int32
+		stackCount;
 	uint32
-		stackCount,
 		crystals[4],
 		binderDBId,
 		crafterDBId;
@@ -77,8 +78,8 @@ public:
 	void					send(byte show = 0);
 	void					send_item_levels();
 
-	std::shared_ptr<item>	get_inventory_item_by_eid(item_eid, byte remove = 0, uint32 stack_count = 1);
-	std::shared_ptr<item>	get_inventory_item_by_id(item_id, byte remove = 0, uint32 stack_count = 1);
+	std::shared_ptr<item>	get_inventory_item_by_eid(item_eid, byte remove = 0, uint32 stack_count = 0);
+	std::shared_ptr<item>	get_inventory_item_by_id(item_id, byte remove = 0, uint32 stack_count = 0);
 
 	std::shared_ptr<item>   get_item(entityId);
 

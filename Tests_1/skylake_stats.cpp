@@ -7,7 +7,7 @@
 #include "connexion.h"
 
 #include <fstream>
-
+#include <random>
 
 uint32 p_stats::get_attack() const {
 	return base_power + bonus_power + base_attack + attack_modifier + enchant_attack + bonus_attack; // buffs
@@ -70,7 +70,7 @@ uint32 p_stats::get_attack_speed() const {
 }
 
 uint32 p_stats::get_movement_speed(uint32 status) const {
-	return status > 0 ?  (base_movement_speed + bonus_movement_speed) : (base_run_speed + bonus_run_speed);
+	return status > 0 ? (base_movement_speed + bonus_movement_speed) : (base_run_speed + bonus_run_speed);
 }
 
 uint32 p_stats::get_pvp_attack() const {
@@ -371,7 +371,7 @@ char* WINAPI parse_stats(char* file, s_stats::stats& stats) {
 		{
 			stats.poison_resist = atof(string_split_get_right(line, '=').c_str());
 		}
-		
+
 		else if (stringStartsWith(line, "gatherSpeed"))
 		{
 			stats.gather_speed = atoi(string_split_get_right(line, '=').c_str());
@@ -608,6 +608,51 @@ bool WINAPI s_stats_parse_class_progress_file(char* file) {
 }
 
 
+
+bool WINAPI s_stats_parse_enchant_file(char* file) {
+	std::string line;
+	char* currsor = file;
+	uint32 line_count = 0;
+	while (currsor)
+	{
+		line_count++;
+		line.clear();
+		currsor = get_line(currsor, line);
+		if (
+			line.size() >= 0 &&
+			line[0] != '#' &&
+			line[0] != '{' &&
+			line[0] != '\n')
+		{
+
+			if (stringStartsWith(line, ".poolRange")) {
+				skylake_e_stats.enchant_pool_range = atoi(string_split_get_right(line, '=').c_str());
+			}
+			else if (stringStartsWith(line, ".alk")) {
+				e_stats::item_e i_e;
+				i_e.id = atoi(string_split_get_right(line, ':').c_str());
+				i_e.rate = atoi(string_split_get_right(line, '=').c_str());
+				skylake_e_stats.material_rates.push_back(i_e);
+			}
+			else if (stringStartsWith(line, ".feed")) {
+				skylake_e_stats.feedstock_multiplier = atof(string_split_get_right(line, '=').c_str());
+			}
+			else if (stringStartsWith(line, "$")) {
+				uint32 index = atoi(string_split_get_right(line, '$').c_str());
+				if (index > 0 && index <= 15) {
+					skylake_e_stats.enchant_rates[index - 1] = atoi(string_split_get_right(line, '=').c_str());
+				}
+				else {
+					printf("::WARNING::SCRIPT. ENCHANT_INDEX_NOT_IN_RANGE[1,15] {%lu} LINE[%lu] FILE[enchant.skylake]\n", index, line_count);
+				}
+			}
+
+		}
+	}
+	return true;
+}
+
+
 bool WINAPI s_stats_load_scripts()
 {
 	skylake_stats.race_progress.clear();
@@ -623,7 +668,7 @@ bool WINAPI s_stats_load_scripts()
 	char* race_progress_file = nullptr;
 	char *class_base_skills_file = nullptr;
 	char* race_base_skills_file = nullptr;
-
+	char* enchant_rates = nullptr;
 	uint32 size = 0;
 
 #pragma region read
@@ -727,6 +772,23 @@ bool WINAPI s_stats_load_scripts()
 	file.read(race_base_skills_file, size);
 	file.close();
 	//-----------------------------------------------
+
+
+	dir = config::dir.dataScripts;
+	dir += "//enchant.skylake";
+	file.open(dir.c_str());
+	if (!file.is_open()) {
+		error_msg = "could not find 'enchant.skylake' in ";
+		error_msg += config::dir.dataScripts;
+		goto error_proc;
+	}
+	file.seekg(0, std::ifstream::end);
+	enchant_rates = new char[(size = (int)file.tellg()) + 1];
+	enchant_rates[size] = 0xff;
+	file.seekg(0, std::ifstream::beg);
+	file.read(enchant_rates, size);
+	file.close();
+	//-----------------------------------------------
 #pragma endregion
 
 	if (!s_stats_parse_class_base_stats_file(class_base_stats_file)) {
@@ -749,18 +811,20 @@ bool WINAPI s_stats_load_scripts()
 		goto error_proc;
 	}
 
-	if (!s_skills_parse_class_base_skills_file(class_base_skills_file))
-	{
+	if (!s_skills_parse_class_base_skills_file(class_base_skills_file)) {
 		error_msg = "FAILED_TO_PARSE class_base_skills.skylake";
 		goto error_proc;
 	}
 
-	if (!s_skills_parse_race_base_skills_file(race_base_skills_file))
-	{
+	if (!s_skills_parse_race_base_skills_file(race_base_skills_file)) {
 		error_msg = "FAILED_TO_PARSE race_base_skills.skylake";
 		goto error_proc;
 	}
 
+	if (!s_stats_parse_enchant_file(enchant_rates)) {
+		error_msg = "FAILED_TO_PARSE enchant.skylake";
+		goto error_proc;
+	}
 
 
 
@@ -796,6 +860,10 @@ bool WINAPI s_stats_load_scripts()
 		class_base_skills_file = 0;
 	}
 
+	if (enchant_rates) {
+		delete[] enchant_rates;
+		enchant_rates = nullptr;
+	}
 
 	return true;
 
@@ -833,6 +901,11 @@ error_proc:
 		class_base_skills_file = 0;
 	}
 
+	if (enchant_rates) {
+		delete[] enchant_rates;
+		enchant_rates = nullptr;
+	}
+
 	printf("::ERROR_ON_LOADING_SCRIPTS. [%s]\n", error_msg.c_str());
 	return false;
 }
@@ -842,6 +915,39 @@ error_proc:
 
 
 
+
+bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 material_item_id, uint32 feed_stock_count)
+{
+	if (target_enchant_level > 0 && target_enchant_level <= 15)
+	{
+		uint32 rate = skylake_e_stats.enchant_rates[target_enchant_level - 1];
+
+		uint32 additional = 0;
+		for (size_t i = 0; i < skylake_e_stats.material_rates.size(); i++) {
+			if (skylake_e_stats.material_rates[i].id == material_item_id) {
+				additional = skylake_e_stats.material_rates[i].rate;
+				break;
+			}
+		}
+
+		additional += (uint32)(feed_stock_count * skylake_e_stats.feedstock_multiplier * 10);
+
+#ifdef _DEBUG
+		uint32 pool = (rand() % skylake_e_stats.enchant_pool_range);
+		printf(
+			"ENCHANTED RATE[%lu] POOL[%lu] FEEDSTOCK_ADD[%lu] CHANCHE[%f]\n", 
+			rate,
+			pool,
+			(uint32)(feed_stock_count * skylake_e_stats.feedstock_multiplier * 10), 
+			(float)(rate / skylake_e_stats.enchant_pool_range));
+
+		return pool <= (rate + additional);
+#else
+		return ((rand() % skylake_e_stats.enchant_pool_range) <= (rate + additional));
+#endif
+	}
+	return false;
+}
 
 void WINAPI s_stats_get_progress(p_ptr p) {
 
@@ -1000,3 +1106,8 @@ void WINAPI s_skills_add_to_base(s_stats::skill &from, p_skills &to)
 	to.active.insert(to.active.end(), from.active.begin(), from.active.end());
 	to.passive.insert(to.passive.end(), from.passive.begin(), from.passive.end());
 }
+
+
+
+
+e_stats::item_e::item_e() :id(0), rate(0) {}
