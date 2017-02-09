@@ -193,6 +193,8 @@ bool enchant_contract::add_item_to_enchant(int32 unk1, item_eid i_eid, int32 unk
 	return true;
 }
 
+
+
 bool enchant_contract::add_material_to_enchant_process(item_eid i_eid, int32 count, uint32 slot)
 {
 	if (!action) {
