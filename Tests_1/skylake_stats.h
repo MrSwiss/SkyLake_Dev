@@ -283,18 +283,38 @@ struct e_stats
 	{
 		item_e();
 		uint32 id;
+		uint32 id_max;
 		uint32 rate;
+		bool is_range;
 	};
 
-	double feedstock_multiplier;
-	uint32 enchant_rates[15];
-	uint32 enchant_pool_range;
+	//------------------ENCHANT-----------------
+	uint32
+			enchant_rates[15],
+			enchant_pool_range;
+	double	feedstock_multiplier;
+	std::vector<item_e> enchant_material_rates;
 
-	std::vector<item_e> material_rates;
+	//------------------ENIGMATIC-----------------
+	uint32
+		mPullRange,
+		sp_cost;
+	std::vector<uint32> spellbind_ids;
+	std::vector<item_e> enigmatic_material_rates;
+
+	//------------------AWAKEN-----------------
+	std::vector<item_e> awaken_material_cost;
 
 }static skylake_e_stats;
 
-bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 material_item_id,uint32 feed_stock_count);
+
+bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 material_item_id, uint32 feed_stock_count);
+bool WINAPI e_can_use_spellbind(uint32);
+uint32 WINAPI e_get_spellbind_id(p_ptr);
+uint32 WINAPI e_get_sp_cost();
+uint32 WINAPI e_get_awaken_material_cost(uint32);
+uint32 WINAPI e_get_scroll_rate(uint32);
+uint32 WINAPI e_get_masterworked(uint32,uint32);
 
 void WINAPI s_stats_get_progress(p_ptr);
 void WINAPI s_stats_get_base_stats(p_ptr);

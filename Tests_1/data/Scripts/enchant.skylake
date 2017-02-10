@@ -1,6 +1,6 @@
 #SKYALKE ENCHANT SCRIPT V1.0
 
-
+#------------------------------ENCHANT----------------------------
 $1=750
 $2=750
 $3=750
@@ -20,10 +20,12 @@ $14=70
 $15=50
 
 
+#default feedstock multiplier=0.0
+#default alk:447 [rate + 30%]
 #default :poolRange=1000
 .poolRange=1000
 
-#masterwok alkahest
+#Masterwork Alkahest
 .alk:447 =0
 
 #Personal Extensive Alkahest
@@ -40,4 +42,47 @@ $15=50
 
 #feedstock multiplier eg[36 * 0.15 * 10 = 54 = 5.4%]
 .feed=0.15
+
+
+#------------------------------ENIGMATIC----------------------------
+#default scroll [Master Enigmatic Scroll] [rate = 70%]
+#default spellbind [SpellBind [id=445]]
+
+#add here spellbind item ids that server will use
+.sp:445
+
+#spellbind cost per locked passivity, [default spCost=5]
+.spCost=32
+
+#defaule masterwokPullRange=10
+.mPullRange=1000
+
+#Master Enigmatic Scroll VII-XI [RANGE]
+.rscroll:907-911 =250
+#Master Enigmatic Scroll
+.scroll:71 =250
+#Federation Enigmatic Scroll
+.scroll:398 =200
+#Common Enigmatic Scroll
+.scroll:93 =10
+#Intricate Enigmatic Scroll
+.scroll:94 =80
+
+#---------------------------AWAKEN-----------------------------------
+#aACost = awakenAlkahestCost
+#raACost = RangeAwakenAlkahestCost
+
+#Masterwork Alkahest
+.aACost:447 =1000
+#Extensive Alkahest
+.aACost:70102 =500
+#Premium Alkahest
+.aACost:180859 =320
+
+
+
+
+
+
+
 

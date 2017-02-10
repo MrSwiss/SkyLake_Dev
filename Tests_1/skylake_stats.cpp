@@ -4,6 +4,7 @@
 #include "Stream.h"
 #include "opcodeEnum.h"
 #include "player.h"
+#include "inventory.h"
 #include "connexion.h"
 
 #include <fstream>
@@ -632,10 +633,35 @@ bool WINAPI s_stats_parse_enchant_file(char* file) {
 				e_stats::item_e i_e;
 				i_e.id = atoi(string_split_get_right(line, ':').c_str());
 				i_e.rate = atoi(string_split_get_right(line, '=').c_str());
-				skylake_e_stats.material_rates.push_back(i_e);
+				skylake_e_stats.enchant_material_rates.push_back(i_e);
 			}
 			else if (stringStartsWith(line, ".feed")) {
 				skylake_e_stats.feedstock_multiplier = atof(string_split_get_right(line, '=').c_str());
+			}
+			else if (stringStartsWith(line, ".spCost")) {
+				skylake_e_stats.sp_cost = atoi(string_split_get_right(line, '=').c_str());
+			}
+			else if (stringStartsWith(line, ".sp")) {
+				skylake_e_stats.spellbind_ids.push_back(atoi(string_split_get_right(line, ':').c_str()));
+			}
+			else if (stringStartsWith(line, ".rscroll")) {
+				e_stats::item_e i_;
+				i_.is_range = true;
+				i_.id = atoi(string_split_get_right(line, ':').c_str());
+				i_.id_max = atoi(string_split_get_right(line, '-').c_str());
+				i_.rate = atoi(string_split_get_right(line, '=').c_str());
+
+				skylake_e_stats.enigmatic_material_rates.push_back(i_);
+			}
+			else if (stringStartsWith(line, ".scroll")) {
+				e_stats::item_e i_;
+				i_.id = atoi(string_split_get_right(line, ':').c_str());
+				i_.rate = atoi(string_split_get_right(line, '=').c_str());
+
+				skylake_e_stats.enigmatic_material_rates.push_back(i_);
+			}
+			else if (stringStartsWith(line, ".mPullRange")) {
+				skylake_e_stats.mPullRange = atoi(string_split_get_right(line, '=').c_str());
 			}
 			else if (stringStartsWith(line, "$")) {
 				uint32 index = atoi(string_split_get_right(line, '$').c_str());
@@ -649,6 +675,38 @@ bool WINAPI s_stats_parse_enchant_file(char* file) {
 
 		}
 	}
+
+
+	//----------------------DEFAULT VALUES--------------------
+	//enchant
+	if (!skylake_e_stats.enchant_pool_range)
+		skylake_e_stats.enchant_pool_range = 1000;
+
+	if (skylake_e_stats.enchant_material_rates.size() == 0) {
+		e_stats::item_e i_;
+		i_.id = 447;
+		i_.rate = (uint32)(skylake_e_stats.enchant_pool_range * 0.3);
+		skylake_e_stats.enchant_material_rates.push_back(i_);
+	}
+
+	//engimatic
+	if (!skylake_e_stats.sp_cost)
+		skylake_e_stats.sp_cost = 5;
+
+	if (!skylake_e_stats.mPullRange)
+		skylake_e_stats.mPullRange = 10;
+
+	if (skylake_e_stats.enigmatic_material_rates.size() == 0) {
+		e_stats::item_e i_;
+		i_.id = 445;
+		i_.rate = (uint32)(skylake_e_stats.mPullRange * 0.7);
+		skylake_e_stats.enigmatic_material_rates.push_back(i_);
+	}
+
+	if (skylake_e_stats.spellbind_ids.size() == 0) {
+		skylake_e_stats.spellbind_ids.push_back(445);
+	}
+
 	return true;
 }
 
@@ -923,9 +981,9 @@ bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 materi
 		uint32 rate = skylake_e_stats.enchant_rates[target_enchant_level - 1];
 
 		uint32 additional = 0;
-		for (size_t i = 0; i < skylake_e_stats.material_rates.size(); i++) {
-			if (skylake_e_stats.material_rates[i].id == material_item_id) {
-				additional = skylake_e_stats.material_rates[i].rate;
+		for (size_t i = 0; i < skylake_e_stats.enchant_material_rates.size(); i++) {
+			if (skylake_e_stats.enchant_material_rates[i].id == material_item_id) {
+				additional = skylake_e_stats.enchant_material_rates[i].rate;
 				break;
 			}
 		}
@@ -935,10 +993,10 @@ bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 materi
 #ifdef _DEBUG
 		uint32 pool = (rand() % skylake_e_stats.enchant_pool_range);
 		printf(
-			"ENCHANTED RATE[%lu] POOL[%lu] FEEDSTOCK_ADD[%lu] CHANCHE[%f]\n", 
+			"ENCHANTED RATE[%lu] POOL[%lu] FEEDSTOCK_ADD[%lu] CHANCHE[%f]\n",
 			rate,
 			pool,
-			(uint32)(feed_stock_count * skylake_e_stats.feedstock_multiplier * 10), 
+			(uint32)(feed_stock_count * skylake_e_stats.feedstock_multiplier * 10),
 			(float)(rate / skylake_e_stats.enchant_pool_range));
 
 		return pool <= (rate + additional);
@@ -947,6 +1005,54 @@ bool WINAPI e_stats_calculate_enchant(uint32 target_enchant_level, uint32 materi
 #endif
 	}
 	return false;
+}
+
+bool WINAPI e_can_use_spellbind(uint32 id) {
+	for (size_t i = 0; i < skylake_e_stats.spellbind_ids.size(); i++)
+		if (skylake_e_stats.spellbind_ids[i] == id)
+			return true;
+	return false;
+}
+
+uint32 WINAPI e_get_spellbind_id(p_ptr p) {
+	//TODO
+
+	return 445;
+}
+
+uint32 WINAPI e_get_sp_cost() {
+	return skylake_e_stats.sp_cost;
+}
+
+uint32 WINAPI e_get_awaken_material_cost(uint32 id) {
+	for (size_t i = 0; i < skylake_e_stats.awaken_material_cost.size(); i++) {
+		if (skylake_e_stats.awaken_material_cost[i].is_range) {
+			if (id >= skylake_e_stats.awaken_material_cost[i].id &&
+				id <= skylake_e_stats.awaken_material_cost[i].id_max)
+				return skylake_e_stats.awaken_material_cost[i].rate;
+		}
+		else if (skylake_e_stats.awaken_material_cost[i].id == id) {
+			return skylake_e_stats.awaken_material_cost[i].rate;
+		}
+	}
+
+	return 0;
+}
+
+uint32 WINAPI e_get_scroll_rate(uint32 id) {
+	for (size_t i = 0; i < skylake_e_stats.enigmatic_material_rates.size(); i++) {
+		if (skylake_e_stats.enigmatic_material_rates[i].is_range) {
+			if (id >= skylake_e_stats.enigmatic_material_rates[i].id &&
+				id <= skylake_e_stats.enigmatic_material_rates[i].id_max)
+				return skylake_e_stats.enigmatic_material_rates[i].rate;
+		}
+		else {
+			if (skylake_e_stats.enigmatic_material_rates[i].id == id)
+				return skylake_e_stats.enigmatic_material_rates[i].rate;
+		}
+	}
+
+	return 0;
 }
 
 void WINAPI s_stats_get_progress(p_ptr p) {
@@ -1110,4 +1216,4 @@ void WINAPI s_skills_add_to_base(s_stats::skill &from, p_skills &to)
 
 
 
-e_stats::item_e::item_e() :id(0), rate(0) {}
+e_stats::item_e::item_e() :id(0), rate(0), id_max(0), is_range(false) {}
