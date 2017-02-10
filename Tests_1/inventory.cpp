@@ -914,7 +914,7 @@ uint32 WINAPI item_stack(std::shared_ptr<item> i, uint32 stack_count, byte mode)
 	{
 		if (!mode)
 		{
-			out = stack_count - i->item_t->maxStack + i->stackCount;
+			out = (stack_count - i->item_t->maxStack) + i->stackCount;
 			i->stackCount = i->item_t->maxStack;
 		}
 		else
@@ -1105,7 +1105,7 @@ void WINAPI inventory_init(std::shared_ptr<player> p, uint16 slot_count)
 	return;
 }
 
-void iventory_get_item_passivities(std::shared_ptr<item> it, std::vector<const passivity_template*>& out)
+void WINAPI iventory_get_item_passivities(std::shared_ptr<item> it, std::vector<const passivity_template*>& out)
 {
 	for (size_t i = 0; i < it->passivities.size(); i++) out.push_back(it->passivities[i]);
 
@@ -1120,6 +1120,223 @@ void iventory_get_item_passivities(std::shared_ptr<item> it, std::vector<const p
 
 	if (it->item_t->equipmentData)
 		out.push_back(it->item_t->equipmentData->passivityG);
+}
+
+void WINAPI send_item_tooltip(p_ptr p, entityId eid, uint32 t){
+	std::shared_ptr<item> i = entity_manager::get_item(eid);
+	if (!i) return;
+	send_item_tooltip(p, i, t);
+	return;
+}
+
+void WINAPI send_item_tooltip(p_ptr p, std::shared_ptr<item> i, uint32 t){
+	std::unique_ptr<Stream> data = std::make_unique<Stream>();
+	data->Clear();
+	data->WriteInt16(0);
+	data->WriteInt16(S_SHOW_ITEM_TOOLTIP);
+
+	data->WriteInt16(i->hasCrystals);
+	uint16 crystalsOffset = data->NextPos();
+
+	data->WriteInt16(i->passivities.size());
+	uint16 passivitiesOffset = data->NextPos();
+
+	uint16 crafterOffset = data->NextPos();
+	uint16 soulbindOffset = data->NextPos();
+
+	data->WriteInt32(t);
+	data->WriteInt64(i->eid);
+	data->WriteInt32(i->item_t->id);
+	data->WriteInt64(i->eid);
+
+	data->WriteInt32(0);//owner id?
+	data->WriteInt32(23);
+	data->WriteInt32(0);//slot id
+
+	data->WriteInt32(9); //unk
+	data->WriteInt32(23); //unk
+	data->WriteInt32(i->stackCount); //unk
+	data->WriteInt32(i->enchantLevel); //enchant
+
+	data->WriteInt32(1); //unk
+
+	data->WriteUInt8(i->isBinded ? 1 : 0);
+
+	data->WriteUInt8(1);
+	data->WriteUInt8(1);
+	data->WriteUInt8(1);
+	data->WriteInt32(3434); //unk
+	data->WriteFloat(23); //unk
+
+	data->WriteInt32(12);
+	data->WriteInt32(13);
+	data->WriteInt32(14);
+	data->WriteInt32(15);
+	data->WriteInt32(16);
+	data->WriteInt32(17);
+	data->WriteInt32(18);
+	data->WriteInt32(19);
+	data->WriteInt32(10);
+
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+
+	data->WriteInt32(1);
+	data->WriteInt32(1);
+
+	data->WriteInt32(5511);
+	data->WriteInt32(5511);
+	data->WriteInt32(5511);
+	data->WriteInt32(5511);
+	data->WriteInt32(5511);
+	data->WriteInt32(5511);//31
+
+
+
+
+	data->WriteUInt8(3);
+
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+	data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
+
+
+	data->WriteUInt8(i->isEnigmatic); //enigmatic 1
+	data->WriteUInt8(0); //enigmatic 2
+	data->WriteUInt8(0); //enigmatic 3
+	data->WriteUInt8(0); //enigmatic 4
+	data->WriteUInt8(i->isMasterworked); //masterworked?
+	data->WriteUInt8(1); //masterworked?
+	data->WriteUInt8(1); //masterworked?
+	data->WriteUInt8(1); //masterworked?
+	data->WriteUInt8(1); //masterworked?
+	data->WriteUInt8(0); //comapre stats
+
+	data->WriteInt32(0);     //attack base range 2
+	data->WriteInt32(0);	    //total when equiped base defense
+	data->WriteInt32(0);	    //total when equiped base impact
+	data->WriteInt32(0);	    //total when equiped base balance
+
+	data->WriteFloat(0);	    //total when equiped base crifactor
+	data->WriteFloat(0);	    //total when equiped base crit resist factor
+	data->WriteFloat(0);	    //total when equiped base crit power
+
+	data->WriteInt32(0);	    //total when equiped base impact factor
+	data->WriteInt32(0);	    //total when equiped base balance factor
+	data->WriteInt32(0);	    //total when equiped base attackSpeed
+	data->WriteInt32(0);	    //total when equiped base movementSpeed
+
+	data->WriteFloat(0);	    //total when equiped base weakening effect (green)
+	data->WriteFloat(0);	    //total when equiped base periodic damage (purple)
+	data->WriteFloat(0);	    //total when equiped base stun resist
+
+	data->WriteInt32(0);  //attack add range 2
+	data->WriteInt32(0);   //additional defense
+	data->WriteInt32(0);   //additional impact
+	data->WriteInt32(0);   //additional balance
+
+	data->WriteFloat(0);	  //additional crifactor
+	data->WriteFloat(0);	  //additional crit resist factor
+	data->WriteFloat(0);	  //additional crit power 
+
+	data->WriteInt32(0);	  //additional impact factor
+	data->WriteInt32(0);	  //additional balance factor
+	data->WriteInt32(0);	  //additional attack speed
+	data->WriteInt32(0);	  //additional movement speed
+
+	data->WriteFloat(0);	  //additional weakening (green)
+	data->WriteFloat(0);	  //additional periodic (purple)
+	data->WriteFloat(0);	  //additional stun
+
+	data->WriteInt32(0); //attack base range 1
+	data->WriteInt32(0); //attack additional range 1
+
+	data->WriteInt32(0);
+	data->WriteInt32(0); //add ilv + base ilv??
+
+	data->WriteUInt8(0);
+	data->WriteUInt8(0);
+	data->WriteUInt8(0); //appearance changed
+	data->WriteUInt8(0);
+
+	data->WriteInt64(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0); //current ilv value item->_itemLevel
+
+	data->WriteInt32(0);  //ilv? item->_itemLevel
+						  //ilv?
+	data->WriteInt32(0); //max ilv value item->_item->_itemLevel
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+
+
+
+
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt64(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(2890);//feedstock count
+
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+
+	data->WriteInt32(0);
+	data->WriteInt32(0);
+	data->WriteInt16(0);
+
+	data->WritePos(crafterOffset);
+	data->WriteInt16(0);
+
+	data->WritePos(soulbindOffset);
+	data->WriteInt16(0);
+
+	for (uint8 j = 0; j < i->hasCrystals; j++)
+	{
+		data->WritePos(crystalsOffset);
+		data->WriteInt16(data->_pos);
+		crystalsOffset = data->NextPos();
+		data->WriteInt32(i->crystals[j]);
+	}
+
+	for (size_t j = 0; j < i->passivities.size(); j++)
+	{
+		data->WritePos(passivitiesOffset);
+		data->WriteInt16(data->_pos);
+		passivitiesOffset = data->NextPos();
+
+		data->WriteInt32(i->passivities[j]->id);
+	}
+
+	data->WritePos(0);
+
+	connection_send(p->con, data.get());
+	return;
 }
 
 void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2)

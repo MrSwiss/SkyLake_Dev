@@ -91,7 +91,7 @@ public:
 
 	int16					get_empty_slot();
 	item_id					get_item(slot_id id);
-	
+
 	bool					move_item(uint32 s_0, uint32 s_1);
 
 	item_id					get_profile_item(slot_id id);
@@ -107,8 +107,8 @@ public:
 	uint16					slot_count;
 
 	uint32
-							profileItemLevel,
-							itemLevel;
+		profileItemLevel,
+		itemLevel;
 
 	uint64					gold;
 
@@ -119,7 +119,7 @@ public:
 	void							lock();
 	void							unlock();
 private:
-	
+
 	void recalculate_levels();
 	CRITICAL_SECTION		inv_lock;
 };
@@ -137,8 +137,10 @@ bool WINAPI slot_insert(inventory_slot &, item_id, uint32 stack_count);
 void WINAPI slot_wipe(inventory_slot &);
 void WINAPI slot_clear(inventory_slot&);
 
+void WINAPI send_item_tooltip(p_ptr, entityId, uint32);
+void WINAPI send_item_tooltip(p_ptr, std::shared_ptr<item>, uint32 type = 20);
 void WINAPI inventory_interchange_items(inventory_slot &s1, inventory_slot& s2);
-static void WINAPI inventory_write_item(inventory_slot *s1, uint32 ,Stream *);
+static void WINAPI inventory_write_item(inventory_slot *s1, uint32, Stream *);
 #endif
 
 

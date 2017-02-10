@@ -32,6 +32,7 @@
 #include "skylake_stats.h"
 #include "bind_contract.h"
 #include "enchant_contract.h"
+#include "enigmatic_contract.h"
 #include <cppconn/connection.h>
 
 bool opcode_init()
@@ -2099,235 +2100,20 @@ bool WINAPI op_del_item(std::shared_ptr<connection> c, void * argv[])
 
 bool WINAPI op_show_item_tooltip_ex(std::shared_ptr<connection> c, void * argv[])
 {
-	Stream *data = &c->_recvBuffer.data;
-	uint16 name_offset = data->ReadUInt16();
-	int32 type = data->ReadUInt32();
-	item_eid eid = data->ReadUInt64();
+	uint16 name_offset = c->_recvBuffer.data.ReadUInt16();
+	uint32 type = c->_recvBuffer.data.ReadUInt32();
+	item_eid eid = c->_recvBuffer.data.ReadUInt64();
 
-	uint32 unk1 = data->ReadUInt32();
-	uint32 unk2 = data->ReadUInt32();
-	uint32 unk3 = data->ReadUInt32();
-	uint32 unk4 = data->ReadUInt32();
-	uint32 unk5 = data->ReadUInt32();
+	//uint32 unk1 = data->ReadUInt32();
+	//uint32 unk2 = data->ReadUInt32();
+	//uint32 unk3 = data->ReadUInt32();
+	//uint32 unk4 = data->ReadUInt32();
+	//uint32 unk5 = data->ReadUInt32();
+	//
+	//data->_pos = name_offset - 4;
+	//std::string player_name = std::move(data->ReadUTF16StringBigEdianToASCII());
 
-	data->_pos = name_offset - 4;
-	std::string player_name = std::move(data->ReadUTF16StringBigEdianToASCII());
-	std::shared_ptr<item> i = nullptr;
-	//if (type == 20)
-	//{
-	//	i = c->_players[c->_selected_player]->i_.get_item(eid);
-	//}
-	//else
-	i = entity_manager::get_item(eid);
-
-	if (i) {
-		data->Clear();
-		data->WriteInt16(0);
-		data->WriteInt16(S_SHOW_ITEM_TOOLTIP);
-
-		data->WriteInt16(i->hasCrystals);
-		short crystalsOffset = data->NextPos();
-
-		data->WriteInt16(i->passivities.size());
-		short passivitiesOffset = data->NextPos();
-
-		short crafterOffset = data->NextPos();
-		short soulbindOffset = data->NextPos();
-
-		data->WriteInt32(type);
-		data->WriteInt64(eid);
-		data->WriteInt32(i->item_t->id);
-		data->WriteInt64(eid);
-
-		data->WriteInt32(c->_players[c->_selected_player]->dbid);
-		data->WriteInt32(23);
-		data->WriteInt32(0);//slot id
-
-		data->WriteInt32(9); //unk
-		data->WriteInt32(23); //unk
-		data->WriteInt32(i->stackCount); //unk
-		data->WriteInt32(i->enchantLevel); //enchant
-
-		data->WriteInt32(1); //unk
-
-		data->WriteUInt8(i->isBinded ? 1 : 0);
-
-		data->WriteUInt8(1);
-		data->WriteUInt8(1);
-		data->WriteUInt8(1);
-		data->WriteInt32(3434); //unk
-		data->WriteFloat(23); //unk
-
-		data->WriteInt32(12);
-		data->WriteInt32(13);
-		data->WriteInt32(14);
-		data->WriteInt32(15);
-		data->WriteInt32(16);
-		data->WriteInt32(17);
-		data->WriteInt32(18);
-		data->WriteInt32(19);
-		data->WriteInt32(10);
-
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-
-		data->WriteInt32(1);
-		data->WriteInt32(1);
-
-		data->WriteInt32(5511);
-		data->WriteInt32(5511);
-		data->WriteInt32(5511);
-		data->WriteInt32(5511);
-		data->WriteInt32(5511);
-		data->WriteInt32(5511);//31
-
-
-
-
-		data->WriteUInt8(3);
-
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-		data->WriteInt64(123123);			 //0xFEFEFEFEFEFEFEFE
-
-
-		data->WriteUInt8(i->isEnigmatic); //enigmatic 1
-		data->WriteUInt8(0); //enigmatic 2
-		data->WriteUInt8(0); //enigmatic 3
-		data->WriteUInt8(0); //enigmatic 4
-		data->WriteUInt8(i->isMasterworked); //masterworked?
-		data->WriteUInt8(1); //masterworked?
-		data->WriteUInt8(1); //masterworked?
-		data->WriteUInt8(1); //masterworked?
-		data->WriteUInt8(1); //masterworked?
-		data->WriteUInt8(0); //comapre stats
-
-		data->WriteInt32(0);     //attack base range 2
-		data->WriteInt32(0);	    //total when equiped base defense
-		data->WriteInt32(0);	    //total when equiped base impact
-		data->WriteInt32(0);	    //total when equiped base balance
-
-		data->WriteFloat(0);	    //total when equiped base crifactor
-		data->WriteFloat(0);	    //total when equiped base crit resist factor
-		data->WriteFloat(0);	    //total when equiped base crit power
-
-		data->WriteInt32(0);	    //total when equiped base impact factor
-		data->WriteInt32(0);	    //total when equiped base balance factor
-		data->WriteInt32(0);	    //total when equiped base attackSpeed
-		data->WriteInt32(0);	    //total when equiped base movementSpeed
-
-		data->WriteFloat(0);	    //total when equiped base weakening effect (green)
-		data->WriteFloat(0);	    //total when equiped base periodic damage (purple)
-		data->WriteFloat(0);	    //total when equiped base stun resist
-
-		data->WriteInt32(0);  //attack add range 2
-		data->WriteInt32(0);   //additional defense
-		data->WriteInt32(0);   //additional impact
-		data->WriteInt32(0);   //additional balance
-
-		data->WriteFloat(0);	  //additional crifactor
-		data->WriteFloat(0);	  //additional crit resist factor
-		data->WriteFloat(0);	  //additional crit power 
-
-		data->WriteInt32(0);	  //additional impact factor
-		data->WriteInt32(0);	  //additional balance factor
-		data->WriteInt32(0);	  //additional attack speed
-		data->WriteInt32(0);	  //additional movement speed
-
-		data->WriteFloat(0);	  //additional weakening (green)
-		data->WriteFloat(0);	  //additional periodic (purple)
-		data->WriteFloat(0);	  //additional stun
-
-		data->WriteInt32(0); //attack base range 1
-		data->WriteInt32(0); //attack additional range 1
-
-		data->WriteInt32(0);
-		data->WriteInt32(0); //add ilv + base ilv??
-
-		data->WriteUInt8(0);
-		data->WriteUInt8(0);
-		data->WriteUInt8(0); //appearance changed
-		data->WriteUInt8(0);
-
-		data->WriteInt64(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0); //current ilv value item->_itemLevel
-
-		data->WriteInt32(0);  //ilv? item->_itemLevel
-							  //ilv?
-		data->WriteInt32(0); //max ilv value item->_item->_itemLevel
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-
-
-
-
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt64(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(2890);//feedstock count
-
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-
-		data->WriteInt32(0);
-		data->WriteInt32(0);
-		data->WriteInt16(0);
-
-		data->WritePos(crafterOffset);
-		data->WriteInt16(0);
-
-		data->WritePos(soulbindOffset);
-		data->WriteInt16(0);
-
-		for (uint8 j = 0; j < i->hasCrystals; j++)
-		{
-			data->WritePos(crystalsOffset);
-			data->WriteInt16(data->_pos);
-			crystalsOffset = data->NextPos();
-			data->WriteInt32(i->crystals[j]);
-		}
-
-		for (size_t j = 0; j < i->passivities.size(); j++)
-		{
-			data->WritePos(passivitiesOffset);
-			data->WriteInt16(data->_pos);
-			passivitiesOffset = data->NextPos();
-
-			data->WriteInt32(i->passivities[j]->id);
-		}
-
-		data->WritePos(0);
-
-
-		return connection_send(c);
-	}
+	send_item_tooltip(c->_players[c->_selected_player], eid, type);
 	return true;
 }
 
@@ -2460,19 +2246,55 @@ bool WINAPI op_add_to_temper_material_ex(std::shared_ptr<connection> c, void * a
 	return true;
 }
 
-bool WINAPI op_check_unidentify_items(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_check_unidentify_items(std::shared_ptr<connection> c, void * argv[])
 {
-	return false;
+	Stream &data = c->_recvBuffer.data;
+	uint32 scrollEId = data.ReadUInt32();
+	uint32 unk2 = data.ReadUInt32();
+	uint32 scrollItemId = data.ReadUInt32(); //Master Enigmatic Scroll|Noble Enigmatic Scroll...
+	uint32 identifyEId = data.ReadUInt32();
+	uint32 unk5 = data.ReadUInt32();
+	uint32 identifyScrollItemId = data.ReadUInt32(); //Intricate Identification Scroll ...
+	uint32 itemEId = data.ReadUInt32();
+	uint32 unk8 = data.ReadUInt32();
+	uint32 itemId = data.ReadUInt32();
+
+	enigmatic_contract* con = (enigmatic_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENIGMATIC_CONTRACT);
+	if (con) {
+		if (!con->add_item(itemEId, scrollItemId, identifyScrollItemId))
+			con->cancel();
+	}
+
+	return true;
 }
 
-bool WINAPI op_random_passive_lock(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_random_passive_lock(std::shared_ptr<connection> c, void * argv[])
 {
-	return false;
+	std::vector<uint32> passivities;
+	uint16 count = c->_recvBuffer.data.ReadUInt16();
+	uint16 next = c->_recvBuffer.data.ReadUInt16();
+
+	c->_recvBuffer.data._pos = next - 4;
+	for (uint16 i = 0; i < count; i++){
+		c->_recvBuffer.data._pos += 4;
+		passivities.push_back(c->_recvBuffer.data.ReadUInt32());
+	}
+
+	enigmatic_contract* con = (enigmatic_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENIGMATIC_CONTRACT);
+	if (con) {
+		con->lock_passivity(passivities);
+	}
+
+	return true;
 }
 
-bool WINAPI op_unidentify_execute(std::shared_ptr<connection>, void * argv[])
+bool WINAPI op_unidentify_execute(std::shared_ptr<connection> c, void * argv[])
 {
-	return false;
+	enigmatic_contract* con = (enigmatic_contract*)c->_players[c->_selected_player]->c_manager.get_contract(ENIGMATIC_CONTRACT);
+	if (con) {
+		con->execute();
+	}
+	return true;
 }
 
 

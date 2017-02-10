@@ -223,6 +223,9 @@
     <ClCompile Include="enchant_contract.cpp">
       <Filter>Framework\contract\contracts</Filter>
     </ClCompile>
+    <ClCompile Include="enigmatic_contract.cpp">
+      <Filter>Framework\contract\contracts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mathUtils.h">
@@ -434,6 +437,9 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="enchant_contract.h">
+      <Filter>Framework\contract\contracts</Filter>
+    </ClInclude>
+    <ClInclude Include="enigmatic_contract.h">
       <Filter>Framework\contract\contracts</Filter>
     </ClInclude>
   </ItemGroup>

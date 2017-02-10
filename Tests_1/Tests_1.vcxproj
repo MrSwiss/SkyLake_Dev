@@ -148,6 +148,7 @@
     <ClCompile Include="contract_factory.cpp" />
     <ClCompile Include="contract_manager.cpp" />
     <ClCompile Include="enchant_contract.cpp" />
+    <ClCompile Include="enigmatic_contract.cpp" />
     <ClCompile Include="entity.cpp" />
     <ClCompile Include="entity_manager.cpp" />
     <ClCompile Include="p_processor.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="contract_manager.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="enchant_contract.h" />
+    <ClInclude Include="enigmatic_contract.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="entity_manager.h" />
     <ClInclude Include="active_server.h" />

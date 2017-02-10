@@ -314,7 +314,7 @@ uint32 WINAPI e_get_spellbind_id(p_ptr);
 uint32 WINAPI e_get_sp_cost();
 uint32 WINAPI e_get_awaken_material_cost(uint32);
 uint32 WINAPI e_get_scroll_rate(uint32);
-uint32 WINAPI e_get_masterworked(uint32,uint32);
+uint32 WINAPI e_get_masterworked(uint32);
 
 void WINAPI s_stats_get_progress(p_ptr);
 void WINAPI s_stats_get_base_stats(p_ptr);

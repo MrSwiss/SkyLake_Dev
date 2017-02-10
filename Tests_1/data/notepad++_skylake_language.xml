@@ -28,6 +28,7 @@
             <Keywords name="Keywords2">power&#x000D;&#x000A;endurance&#x000D;&#x000A;impact&#x000D;&#x000A;balance&#x000D;&#x000A;attackSpeed&#x000D;&#x000A;hp&#x000D;&#x000A;mp&#x000D;&#x000A;runSpeed&#x000D;&#x000A;movementSpeed&#x000D;&#x000A;attack&#x000D;&#x000A;defense&#x000D;&#x000A;pvpAttack&#x000D;&#x000A;pvpDefense&#x000D;&#x000A;</Keywords>
             <Keywords name="Keywords3">@&#x000D;&#x000A;%&#x000D;&#x000A;$</Keywords>
             <Keywords name="Keywords4">critRate&#x000D;&#x000A;critResist&#x000D;&#x000A;critPower&#x000D;&#x000A;stunResist&#x000D;&#x000A;stunRate&#x000D;&#x000A;weakeningResist&#x000D;&#x000A;weakeningRate&#x000D;&#x000A;poisonResist&#x000D;&#x000A;poisonRate</Keywords>
+            <Keywords name="Keywords5">.poolRange&#x000D;&#x000A;.alk&#x000D;&#x000A;.feed&#x000D;&#x000A;.sp&#x000D;&#x000A;.mPullRange&#x000D;&#x000A;.scroll&#x000D;&#x000A;.rscroll&#x000D;&#x000A;.aACost</Keywords>
             <Keywords name="Keywords6">gatherSpeed&#x000D;&#x000A;mineSpeed&#x000D;&#x000A;harvestSpeed&#x000D;&#x000A;craftSpeed</Keywords>
             <Keywords name="Keywords7">special&#x000D;&#x000A;specialRegen&#x000D;&#x000A;specialRegenRate</Keywords>
             <Keywords name="Keywords8">fiveHpRegen&#x000D;&#x000A;threeHpRegen&#x000D;&#x000A;fiveMpRegen&#x000D;&#x000A;threeMpRegen</Keywords>

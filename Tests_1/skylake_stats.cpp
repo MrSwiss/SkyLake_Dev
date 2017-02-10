@@ -1055,6 +1055,10 @@ uint32 WINAPI e_get_scroll_rate(uint32 id) {
 	return 0;
 }
 
+uint32 WINAPI e_get_masterworked(uint32 scroll_i_id){
+	return ((rand() % skylake_e_stats.mPullRange) < (e_get_scroll_rate(scroll_i_id))) ? true : false;
+}
+
 void WINAPI s_stats_get_progress(p_ptr p) {
 
 	for (size_t i = 0; i < skylake_stats.class_progress.size(); i++)
